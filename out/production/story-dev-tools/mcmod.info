@@ -1,0 +1,16 @@
+[
+{
+  "modid": "story-dev-tools",
+  "name": "storycraft DevTools",
+  "description": "storycraft's DevTools",
+  "version": "0.1",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["storycraft"],
+  "credits": "storycraft",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
