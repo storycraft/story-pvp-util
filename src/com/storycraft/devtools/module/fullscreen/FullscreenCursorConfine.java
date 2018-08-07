@@ -9,7 +9,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 
 public class FullscreenCursorConfine implements IModule {
@@ -42,6 +41,14 @@ public class FullscreenCursorConfine implements IModule {
         isModEnabled();
     }
 
+    @Override
+    public void postInitialize() {
+        if (!isModEnabled() && minecraft.isFullScreen()) {
+            toggleFullscreen();
+            toggleFullscreen();
+        }
+    }
+
     private KeyBinding bindFullscreenKey() {
         KeyBinding[] list = minecraft.gameSettings.keyBindings;
         KeyBinding target = minecraft.gameSettings.keyBindFullscreen;
@@ -66,6 +73,10 @@ public class FullscreenCursorConfine implements IModule {
         return getModuleConfigEntry().get("confine_cursor_on_fullscreen").getAsBoolean();
     }
 
+    public void setModEnabled(boolean flag) {
+        getModuleConfigEntry().set("confine_cursor_on_fullscreen", true);
+    }
+
     public JsonConfigEntry getModuleConfigEntry(){
         if (!mod.getDefaultConfig().contains(OPTION_CATEGORY)) {
             mod.getDefaultConfig().set(OPTION_CATEGORY, new JsonConfigEntry());
@@ -77,33 +88,36 @@ public class FullscreenCursorConfine implements IModule {
     @SubscribeEvent
     public void onFullscreenSwitch(InputEvent.KeyInputEvent e){
         if (fullscreenToggle.isPressed()){
-            boolean isFullscreen = minecraft.isFullScreen();
+            toggleFullscreen();
+        }
+    }
 
-            if (!isModEnabled()){
-                if (minecraft.isFullScreen()){
-                    try {
-                        Display.setLocation(0, 0);
-                        updateDisplayMode.invoke(minecraft);
-                        fullscreen.set(minecraft, minecraft.gameSettings.fullScreen = !isFullscreen);
-                        System.setProperty("org.lwjgl.opengl.Window.undecorated","true");
-                        minecraft.updateDisplay();
-                    } catch (Exception ex) {
-                        mod.getLogger().warning("cannot switch to windowed fullscreen");
+    private void toggleFullscreen() {
+        if (!isModEnabled()){
+            if (!minecraft.isFullScreen()){
+                try {
+                    Display.setLocation(0, 0);
+                    System.setProperty("org.lwjgl.opengl.Window.undecorated","true");
+                    updateDisplayMode.invoke(minecraft);
+                    fullscreen.set(minecraft, minecraft.gameSettings.fullScreen = true);
+                    minecraft.resize(minecraft.displayWidth, minecraft.displayHeight);
+                    minecraft.updateDisplay();
+                } catch (Exception ex) {
+                    mod.getLogger().warning("cannot switch to windowed fullscreen");
 
-                        getModuleConfigEntry().set("confine_cursor_on_fullscreen", true);
-                        onFullscreenSwitch(e);
-                    }
+                    setModEnabled(true);
+                    toggleFullscreen();
                 }
-                else {
-                    minecraft.toggleFullscreen();
-                    System.setProperty("org.lwjgl.opengl.Window.undecorated","false");
-                }
-
             }
             else {
                 minecraft.toggleFullscreen();
                 System.setProperty("org.lwjgl.opengl.Window.undecorated","false");
             }
+
+        }
+        else {
+            minecraft.toggleFullscreen();
+            System.setProperty("org.lwjgl.opengl.Window.undecorated","false");
         }
     }
 }
