@@ -35,12 +35,12 @@ public class ClientPlayerNameTag implements IModule {
     private static Reflect.WrappedField<Double, RenderManager> renderPosZ;
 
     static {
-        renderOffsetLivingLabel = Reflect.getMethod(RenderPlayer.class, "renderOffsetLivingLabel", AbstractClientPlayer.class, double.class, double.class, double.class, String.class, float.class, double.class);
-        timer = Reflect.getField(Minecraft.class, "timer");
+        renderOffsetLivingLabel = Reflect.getMethod(RenderPlayer.class, new String[]{"renderOffsetLivingLabel", "func_177069_a"}, AbstractClientPlayer.class, double.class, double.class, double.class, String.class, float.class, double.class);
+        timer = Reflect.getField(Minecraft.class, "timer", "field_71428_T");
 
-        renderPosX = Reflect.getField(RenderManager.class, "renderPosX");
-        renderPosY = Reflect.getField(RenderManager.class, "renderPosY");
-        renderPosZ = Reflect.getField(RenderManager.class, "renderPosZ");
+        renderPosX = Reflect.getField(RenderManager.class, "renderPosX", "field_78725_b");
+        renderPosY = Reflect.getField(RenderManager.class, "renderPosY", "field_78726_c");
+        renderPosZ = Reflect.getField(RenderManager.class, "renderPosZ", "field_78723_d");
     }
 
     private DevTools mod;

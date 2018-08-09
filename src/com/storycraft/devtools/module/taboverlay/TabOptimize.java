@@ -24,7 +24,7 @@ public class TabOptimize implements IModule {
     private static final Reflect.WrappedField<GuiPlayerTabOverlay, GuiIngame> overlayPlayerList;
 
     static {
-        overlayPlayerList = Reflect.getField(GuiIngame.class, "overlayPlayerList");
+        overlayPlayerList = Reflect.getField(GuiIngame.class, "overlayPlayerList", "field_175196_v");
     }
 
     private DevTools mod;
@@ -79,7 +79,7 @@ public class TabOptimize implements IModule {
                     GL11.glScalef(0.5f, 0.5f, 0.5f);
                     int x = p_175245_2_ + p_175245_1_ - (minecraft.fontRendererObj.getStringWidth("" + ping + "") >> 1) - 2;
                     int y = p_175245_3_ + (minecraft.fontRendererObj.FONT_HEIGHT >> 2);
-                    minecraft.fontRendererObj.drawString("" + ping + "", (float)(2 * x), (float)(2 * y), colour, false);
+                    minecraft.fontRendererObj.drawString("" + ping + "", (float)(2 * x), (float)(2 * y), colour, true);
                     GL11.glScalef(2.0f, 2.0f, 2.0f);
                     GL11.glPopMatrix();
                 }

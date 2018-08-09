@@ -31,12 +31,12 @@ public class ChatOptimize implements IModule {
 
     static {
         field_146253_i = Reflect.getField(GuiNewChat.class, "field_146253_i");
-        scrollPos = Reflect.getField(GuiNewChat.class, "scrollPos");
-        isScrolled = Reflect.getField(GuiNewChat.class, "isScrolled");
+        scrollPos = Reflect.getField(GuiNewChat.class, "scrollPos", "field_146250_j");
+        isScrolled = Reflect.getField(GuiNewChat.class, "isScrolled", "field_146251_k");
 
-        persistantChatGUI = Reflect.getField(GuiIngame.class, "persistantChatGUI");
+        persistantChatGUI = Reflect.getField(GuiIngame.class, "persistantChatGUI", "field_73840_e");
 
-        defaultInputFieldText = Reflect.getField(GuiChat.class, "defaultInputFieldText");
+        defaultInputFieldText = Reflect.getField(GuiChat.class, "defaultInputFieldText", "field_146409_v");
     }
 
     private DevTools mod;

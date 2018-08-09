@@ -28,9 +28,9 @@ public class ServerResourcePackBypass implements IModule {
     private DevTools mod;
 
     static {
-        mcResourcePackRepository = Reflect.getField(Minecraft.class, "mcResourcePackRepository");
-        metadataSerializer_ = Reflect.getField(Minecraft.class, "metadataSerializer_");
-        dirServerResourcepacks = Reflect.getField(ResourcePackRepository.class, "dirServerResourcepacks");
+        mcResourcePackRepository = Reflect.getField(Minecraft.class, "mcResourcePackRepository", "field_110448_aq");
+        metadataSerializer_ = Reflect.getField(Minecraft.class, "metadataSerializer_", "field_110452_an");
+        dirServerResourcepacks = Reflect.getField(ResourcePackRepository.class, "dirServerResourcepacks", "field_148534_e");
     }
 
     @Override

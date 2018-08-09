@@ -5,9 +5,9 @@ import com.storycraft.devtools.storage.ModDataStorage;
 import com.storycraft.devtools.storage.Storage;
 import com.storycraft.devtools.util.AsyncTask;
 import com.storycraft.devtools.util.Parallel;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,12 +48,12 @@ public class ConfigManager {
             @Override
             public void run(String name) {
                 try {
-                    ByteOutputStream output = new ByteOutputStream();
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();
 
                     IConfigFile configFile = getConfigFileMap().get(name);
                     configFile.save(output);
 
-                    getDataStorage().saveSync(output.getBytes(), name);
+                    getDataStorage().saveSync(output.toByteArray(), name);
                 } catch (IOException e) {
                     getMod().getLogger().warning(name + " 저장 중 오류가 발생 했습니다 " + e.getLocalizedMessage());
                 }

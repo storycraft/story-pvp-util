@@ -19,8 +19,8 @@ public class FullscreenCursorConfine implements IModule {
     private static final Reflect.WrappedMethod<Void, Minecraft> updateDisplayMode;
 
     static {
-        fullscreen = Reflect.getField(Minecraft.class, "fullscreen");
-        updateDisplayMode = Reflect.getMethod(Minecraft.class, "updateDisplayMode");
+        fullscreen = Reflect.getField(Minecraft.class, "fullscreen", "field_71431_Q");
+        updateDisplayMode = Reflect.getMethod(Minecraft.class, Minecraft.getMinecraft(), new String[]{"updateDisplayMode", "func_110441_Q"});
     }
 
     private DevTools mod;

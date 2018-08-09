@@ -29,7 +29,7 @@ public class DynamicRenderManager extends RenderManager {
     private static Reflect.WrappedField<Boolean, RenderManager> renderOutlines;
 
     static {
-        renderOutlines = Reflect.getField(RenderManager.class, "renderOutlines");
+        renderOutlines = Reflect.getField(RenderManager.class, "renderOutlines", "field_178639_r");
     }
 
     public DynamicRenderManager(TextureManager renderEngineIn, RenderItem itemRendererIn, DynamicBoundingBox dynamicBoundingBox) {

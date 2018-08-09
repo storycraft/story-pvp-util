@@ -8,9 +8,7 @@ import com.storycraft.devtools.util.reflect.Reflect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class DynamicBoundingBox implements IModule {
 
@@ -20,8 +18,8 @@ public class DynamicBoundingBox implements IModule {
     private static Reflect.WrappedField<RenderManager, RenderGlobal> renderManagerGlobalField;
 
     static {
-        renderManagerField = Reflect.getField(Minecraft.class, "renderManager");
-        renderManagerGlobalField = Reflect.getField(RenderGlobal.class, "renderManager");
+        renderManagerField = Reflect.getField(Minecraft.class, "renderManager", "field_175616_W");
+        renderManagerGlobalField = Reflect.getField(RenderGlobal.class, "renderManager", "field_175010_j");
     }
 
     private DevTools mod;
