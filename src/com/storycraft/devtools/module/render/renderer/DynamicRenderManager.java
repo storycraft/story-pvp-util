@@ -2,6 +2,7 @@ package com.storycraft.devtools.module.render.renderer;
 
 import com.storycraft.devtools.module.render.DynamicBoundingBox;
 import com.storycraft.devtools.util.reflect.Reflect;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
@@ -83,7 +84,7 @@ public class DynamicRenderManager extends RenderManager {
                         boolean drawProjectile = dynamicBoundingBox.isProjectileBoundingBoxEnabled();
                         boolean drawNonLiving = dynamicBoundingBox.isNonLivingBoundingBoxEnabled();
 
-                        if (entity instanceof EntityLiving || drawProjectile && entity instanceof IProjectile || drawNonLiving) {
+                        if (entity instanceof EntityLiving || entity instanceof EntityOtherPlayerMP || drawProjectile && entity instanceof IProjectile || drawNonLiving) {
                             boolean hideRequired = dynamicBoundingBox.isHideRequired();
                             if (hideRequired) {
                                 if (!entity.isEntityAlive())

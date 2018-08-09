@@ -1,19 +1,25 @@
 package com.storycraft.devtools.module.server;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.storycraft.devtools.DevTools;
 import com.storycraft.devtools.config.json.JsonConfigEntry;
 import com.storycraft.devtools.module.IModule;
 import com.storycraft.devtools.util.reflect.Reflect;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreenWorking;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.client.resources.ResourcePackRepository;
 import net.minecraft.client.resources.data.IMetadataSerializer;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.util.HttpUtil;
 
 import java.io.File;
 import java.sql.Ref;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ServerResourcePackBypass implements IModule {
@@ -76,12 +82,36 @@ public class ServerResourcePackBypass implements IModule {
         public ListenableFuture<Object> downloadResourcePack(String url, String hash) {
             if (isModEnabled()) {
                 //L
-                return HttpUtil.field_180193_a.submit(new Callable<Object>() {
-                    @Override
-                    public Object call() {
-                        return null;
+                String s;
+
+                if (hash.matches("^[a-f0-9]{40}$"))
+                {
+                    s = hash;
+                }
+                else
+                {
+                    s = "legacy";
+                }
+
+                final File file1 = new File(dirServerResourcepacks.get(this), s);
+                GuiScreenWorking guiscreenworking = new GuiScreenWorking();
+
+                final SettableFuture<Object> settablefuture = SettableFuture.<Object>create();
+                Map<String, String> map = Minecraft.getSessionInfo();
+                ListenableFuture<Object> downloadTask = HttpUtil.downloadResourcePack(file1, url, map, 52428800, guiscreenworking, minecraft.getProxy());
+                Futures.addCallback(downloadTask, new FutureCallback<Object>()
+                {
+                    public void onSuccess(Object p_onSuccess_1_)
+                    {
+                        settablefuture.set(null);
+                    }
+                    public void onFailure(Throwable p_onFailure_1_)
+                    {
+                        settablefuture.set(null);
                     }
                 });
+
+                return downloadTask;
             }
             else {
                 return super.downloadResourcePack(url, hash);
