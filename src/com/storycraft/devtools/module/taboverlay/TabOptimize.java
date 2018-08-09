@@ -13,6 +13,7 @@ import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import org.lwjgl.opengl.GL11;
@@ -30,6 +31,8 @@ public class TabOptimize implements IModule {
     private DevTools mod;
     private Minecraft minecraft;
 
+    private boolean isNumberMode;
+
     @Override
     public void preInitialize() {
         this.minecraft = Minecraft.getMinecraft();
@@ -39,7 +42,7 @@ public class TabOptimize implements IModule {
     public void initialize(DevTools mod) {
         this.mod = mod;
 
-        isNumberMode();
+        this.isNumberMode = isNumberMode();
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -47,6 +50,11 @@ public class TabOptimize implements IModule {
     @SubscribeEvent
     public void guiTabOverlay(FMLNetworkEvent.ClientConnectedToServerEvent e) {
         overlayPlayerList.set(minecraft.ingameGUI, new OptimizedTabOverlay(minecraft, minecraft.ingameGUI));
+    }
+
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+        this.isNumberMode = isNumberMode();
     }
 
     public boolean isNumberMode() {
@@ -71,7 +79,7 @@ public class TabOptimize implements IModule {
 
         protected void drawPing(int p_175245_1_, int p_175245_2_, int p_175245_3_, NetworkPlayerInfo networkPlayerInfoIn)
         {
-            if (isNumberMode()) {
+            if (isNumberMode) {
                 int ping = networkPlayerInfoIn.getResponseTime();
                 int colour = ping > 500 ? 11141120 : (ping > 300 ? 11184640 : (ping > 200 ? 11193344 : (ping > 135 ? 2128640 : (ping > 70 ? 39168 : (ping > 0 ? 47872 : 11141120)))));
                 if (ping > 0 && ping < 10000) {

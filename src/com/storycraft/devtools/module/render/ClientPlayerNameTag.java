@@ -18,6 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Timer;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.opengl.GL11;
@@ -46,12 +47,11 @@ public class ClientPlayerNameTag implements IModule {
     private DevTools mod;
     private Minecraft minecraft;
 
-    private boolean renderTag;
+    private boolean modEnabled;
 
     @Override
     public void preInitialize() {
         minecraft = Minecraft.getMinecraft();
-        renderTag = false;
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -60,12 +60,17 @@ public class ClientPlayerNameTag implements IModule {
     public void initialize(DevTools mod) {
         this.mod = mod;
 
-        isModEnabled();
+        this.modEnabled = isModEnabled();
+    }
+
+    @SubscribeEvent
+    public void onConfigUpdate(ConfigChangedEvent.OnConfigChangedEvent e) {
+        modEnabled = isModEnabled();
     }
 
     @SubscribeEvent
     public void onPostRender(RenderPlayerEvent.Post e){
-        if (isModEnabled() && needRenderTag() && e.entityPlayer.isUser()) {
+        if (modEnabled && minecraft.gameSettings.thirdPersonView != 0 && e.entityPlayer.isUser()) {
             EntityPlayer entity = e.entityPlayer;
 
             double d0 = e.entityPlayer.lastTickPosX + (e.entityPlayer.posX - e.entityPlayer.lastTickPosX) * e.partialRenderTick;
@@ -115,21 +120,11 @@ public class ClientPlayerNameTag implements IModule {
         }
     }
 
-    public boolean needRenderTag() {
-        return renderTag;
-    }
-
     public boolean isModEnabled() {
         if (!getModuleConfigEntry().contains("nametag_on_client_player"))
             getModuleConfigEntry().set("nametag_on_client_player", false);
 
         if (getModuleConfigEntry().get("nametag_on_client_player").getAsBoolean()) {
-            if (minecraft.gameSettings.thirdPersonView != 0) {
-                renderTag = true;
-            } else {
-                renderTag = false;
-            }
-
             return true;
         }
 

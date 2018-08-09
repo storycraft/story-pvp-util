@@ -22,10 +22,37 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class DynamicRenderManager extends RenderManager {
 
     private DynamicBoundingBox dynamicBoundingBox;
+
+    private boolean isAimHighlightEnabled;
+    private int boundingBoxDistance;
+    private boolean isHideRequired;
+    private boolean isHideNearOrFar;
+    private boolean isEyeSightDrawingEnabled;
+    private boolean isEyePosDrawingEnabled;
+    private boolean isProjectileBoundingBoxEnabled;
+    private boolean isNonLivingBoundingBoxEnabled;
+
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+        updateSettings();
+    }
+
+    public void updateSettings(){
+        this.isAimHighlightEnabled = dynamicBoundingBox.isAimHighlightEnabled();
+        this.boundingBoxDistance = dynamicBoundingBox.getBoundingBoxDistance();
+        this.isHideRequired = dynamicBoundingBox.isHideRequired();
+        this.isHideNearOrFar = dynamicBoundingBox.isHideNearOrFar();
+        this.isEyeSightDrawingEnabled = dynamicBoundingBox.isEyeSightDrawingEnabled();
+        this.isEyePosDrawingEnabled = dynamicBoundingBox.isEyePosDrawingEnabled();
+        this.isProjectileBoundingBoxEnabled = dynamicBoundingBox.isProjectileBoundingBoxEnabled();
+        this.isNonLivingBoundingBoxEnabled = dynamicBoundingBox.isNonLivingBoundingBoxEnabled();
+    }
 
     private static Reflect.WrappedField<Boolean, RenderManager> renderOutlines;
 
@@ -81,22 +108,16 @@ public class DynamicRenderManager extends RenderManager {
                 {
                     try
                     {
-                        boolean drawProjectile = dynamicBoundingBox.isProjectileBoundingBoxEnabled();
-                        boolean drawNonLiving = dynamicBoundingBox.isNonLivingBoundingBoxEnabled();
-
-                        if (entity instanceof EntityLiving || entity instanceof EntityOtherPlayerMP || drawProjectile && entity instanceof IProjectile || drawNonLiving) {
-                            boolean hideRequired = dynamicBoundingBox.isHideRequired();
-                            if (hideRequired) {
+                        if (entity instanceof EntityLiving || entity instanceof EntityOtherPlayerMP || isProjectileBoundingBoxEnabled && entity instanceof IProjectile || isNonLivingBoundingBoxEnabled) {
+                            if (isHideRequired) {
                                 if (!entity.isEntityAlive())
                                     return true;
-
-                                boolean hideNearOrFar = dynamicBoundingBox.isHideNearOrFar();
 
                                 int limit = dynamicBoundingBox.getBoundingBoxDistance();
                                 int sqLimit = limit * limit;
                                 double distanceSq = livingPlayer.getDistanceSqToEntity(entity);
 
-                                if (hideNearOrFar) {
+                                if (isHideNearOrFar) {
                                     if (distanceSq < sqLimit)
                                         return true;
                                 } else {
@@ -137,8 +158,6 @@ public class DynamicRenderManager extends RenderManager {
 
     private void renderDebugBoundingBox(Entity entityIn, double p_85094_2_, double p_85094_4_, double p_85094_6_, float p_85094_8_, float p_85094_9_)
     {
-        boolean highlightOnAim = dynamicBoundingBox.isAimHighlightEnabled();
-
         GlStateManager.depthMask(false);
         GlStateManager.disableTexture2D();
         GlStateManager.disableLighting();
@@ -150,8 +169,7 @@ public class DynamicRenderManager extends RenderManager {
         AxisAlignedBB axisalignedbb = entityIn.getEntityBoundingBox();
         AxisAlignedBB axisalignedbb1 = new AxisAlignedBB(axisalignedbb.minX - entityIn.posX + p_85094_2_, axisalignedbb.minY - entityIn.posY + p_85094_4_, axisalignedbb.minZ - entityIn.posZ + p_85094_6_, axisalignedbb.maxX - entityIn.posX + p_85094_2_, axisalignedbb.maxY - entityIn.posY + p_85094_4_, axisalignedbb.maxZ - entityIn.posZ + p_85094_6_);
 
-        boolean drawEyePos = dynamicBoundingBox.isEyePosDrawingEnabled();
-        boolean red = highlightOnAim && entityIn == pointedEntity;
+        boolean red = isAimHighlightEnabled && entityIn == pointedEntity;
 
         if (red){
             RenderGlobal.drawOutlinedBoundingBox(axisalignedbb1, 255, 0, 0, 255);
@@ -160,22 +178,18 @@ public class DynamicRenderManager extends RenderManager {
             RenderGlobal.drawOutlinedBoundingBox(axisalignedbb1, 255, 255, 255, 255);
         }
 
-        if (drawEyePos && entityIn instanceof EntityLivingBase)
+        if (isEyePosDrawingEnabled && entityIn instanceof EntityLivingBase)
         {
             RenderGlobal.drawOutlinedBoundingBox(new AxisAlignedBB(p_85094_2_ - f, p_85094_4_ + entityIn.getEyeHeight() - 0.009999999776482582D, p_85094_6_ - f, p_85094_2_ + f, p_85094_4_ + entityIn.getEyeHeight() + 0.009999999776482582D, p_85094_6_ + f), 255, 0, 0, 255);
         }
 
-        boolean drawEyeSight = dynamicBoundingBox.isEyeSightDrawingEnabled();
-
-        if (drawEyeSight) {
+        if (isEyeSightDrawingEnabled) {
             Tessellator tessellator = Tessellator.getInstance();
             WorldRenderer worldrenderer = tessellator.getWorldRenderer();
             Vec3 vec3 = entityIn.getLook(p_85094_9_);
             worldrenderer.begin(3, DefaultVertexFormats.POSITION_COLOR);
             worldrenderer.pos(p_85094_2_, p_85094_4_ +  entityIn.getEyeHeight(), p_85094_6_).color(0, 0, 255, 255).endVertex();
-            if (drawEyeSight) {
-                worldrenderer.pos(p_85094_2_ + vec3.xCoord * 2.0D, p_85094_4_ +  entityIn.getEyeHeight() + vec3.yCoord * 2.0D, p_85094_6_ + vec3.zCoord * 2.0D).color(0, 0, 255, 255).endVertex();
-            }
+            worldrenderer.pos(p_85094_2_ + vec3.xCoord * 2.0D, p_85094_4_ +  entityIn.getEyeHeight() + vec3.yCoord * 2.0D, p_85094_6_ + vec3.zCoord * 2.0D).color(0, 0, 255, 255).endVertex();
             tessellator.draw();
         }
 

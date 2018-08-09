@@ -110,14 +110,14 @@ public class FullscreenCursorConfine implements IModule {
                 }
             }
             else {
-                minecraft.toggleFullscreen();
                 System.setProperty("org.lwjgl.opengl.Window.undecorated","false");
+                minecraft.toggleFullscreen();
             }
 
         }
         else {
-            minecraft.toggleFullscreen();
             System.setProperty("org.lwjgl.opengl.Window.undecorated","false");
+            minecraft.toggleFullscreen();
         }
     }
 }

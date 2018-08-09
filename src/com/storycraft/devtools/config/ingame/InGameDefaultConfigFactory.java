@@ -7,6 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Set;
@@ -33,7 +34,7 @@ public class InGameDefaultConfigFactory implements IModGuiFactory {
         return null;
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e) {
         if (!DevTools.getModMetadata().modId.equalsIgnoreCase(e.modID) || e.getResult() == Event.Result.DENY || e.isCanceled())
             return;

@@ -12,6 +12,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import org.lwjgl.input.Mouse;
@@ -42,6 +43,10 @@ public class ChatOptimize implements IModule {
     private DevTools mod;
     private Minecraft minecraft;
 
+    private boolean isBackgroundEnabled;
+    private boolean isShadowEnabled;
+    private boolean isAlphaFakeDisabled;
+
     @Override
     public void preInitialize() {
         this.minecraft = Minecraft.getMinecraft();
@@ -51,13 +56,21 @@ public class ChatOptimize implements IModule {
     public void initialize(DevTools mod) {
         this.mod = mod;
 
-        isBackgroundEnabled();
-        isShadowEnabled();
-        isAlphaFakeDisabled();
+        this.isBackgroundEnabled = isBackgroundEnabled();
+        this.isShadowEnabled = isShadowEnabled();
+        this.isAlphaFakeDisabled = isAlphaFakeDisabled();
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new ChatRegister());
     }
+
+    @SubscribeEvent
+    public void onConfigUpdate(ConfigChangedEvent.OnConfigChangedEvent e){
+        this.isBackgroundEnabled = isBackgroundEnabled();
+        this.isShadowEnabled = isShadowEnabled();
+        this.isAlphaFakeDisabled = isAlphaFakeDisabled();
+    }
+
 
     @SubscribeEvent
     public void guiChat(GuiOpenEvent e) {
@@ -123,13 +136,12 @@ public class ChatOptimize implements IModule {
             {
                 int i = this.getLineCount();
                 int scrollPos = ChatOptimize.scrollPos.get(this);
-                boolean backgroundEnabled = isBackgroundEnabled();
                 boolean isScrolled = ChatOptimize.isScrolled.get(this);
                 boolean flag = false;
                 int j = 0;
                 int k = field_146253_i.get(this).size();
                 float f;
-                if (isAlphaFakeDisabled()){
+                if (isAlphaFakeDisabled){
                     f = minecraft.gameSettings.chatOpacity;
                 }
                 else {
@@ -151,7 +163,7 @@ public class ChatOptimize implements IModule {
 
                     for (int i1 = 0; i1 + scrollPos < k && i1 < i; ++i1)
                     {
-                        ChatLine chatline = (ChatLine) field_146253_i.get(this).get(i1 + scrollPos);
+                        ChatLine chatline = field_146253_i.get(this).get(i1 + scrollPos);
 
                         if (chatline != null)
                         {
@@ -179,11 +191,11 @@ public class ChatOptimize implements IModule {
                                     int i2 = 0;
                                     int j2 = -i1 * 9;
 
-                                    if (backgroundEnabled)
+                                    if (isBackgroundEnabled)
                                         drawRect(i2, j2 - 9, i2 + l + 4, j2, l1 / 2 << 24);
                                     String s = chatline.getChatComponent().getFormattedText();
                                     GlStateManager.enableBlend();
-                                    minecraft.fontRendererObj.drawString(s, (float)i2, (float)(j2 - 8), 16777215 + (l1 << 24), isShadowEnabled());
+                                    minecraft.fontRendererObj.drawString(s, (float)i2, (float)(j2 - 8), 16777215 + (l1 << 24), isShadowEnabled);
                                     GlStateManager.disableAlpha();
                                     GlStateManager.disableBlend();
                                 }

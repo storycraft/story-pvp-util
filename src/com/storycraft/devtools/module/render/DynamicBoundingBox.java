@@ -8,6 +8,9 @@ import com.storycraft.devtools.util.reflect.Reflect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class DynamicBoundingBox implements IModule {
@@ -36,23 +39,12 @@ public class DynamicBoundingBox implements IModule {
     public void initialize(DevTools mod) {
         this.mod = mod;
 
-        isAimHighlightEnabled();
-        getBoundingBoxDistance();
-        isHideRequired();
-        isHideNearOrFar();
-        isEyeSightDrawingEnabled();
-        isEyePosDrawingEnabled();
-        isProjectileBoundingBoxEnabled();
-        isNonLivingBoundingBoxEnabled();
-
         dynamicRenderManager = new DynamicRenderManager(minecraft.getTextureManager(), minecraft.getRenderItem(), this);
         renderManagerField.set(minecraft, dynamicRenderManager);
         renderManagerGlobalField.set(minecraft.renderGlobal, dynamicRenderManager);
-    }
 
-    @Override
-    public void postInitialize() {
-
+        MinecraftForge.EVENT_BUS.register(dynamicRenderManager);
+        dynamicRenderManager.updateSettings();
     }
 
     public boolean isAimHighlightEnabled() {
