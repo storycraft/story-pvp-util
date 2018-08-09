@@ -1,9 +1,7 @@
 package com.storycraft.devtools.config.json;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
+import com.google.gson.stream.JsonWriter;
 import com.storycraft.devtools.config.IConfigFile;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
@@ -29,7 +27,7 @@ public class JsonConfigFile extends JsonConfigEntry implements IConfigFile {
         try {
             setJsonObject(new JsonParser().parse(new InputStreamReader(is)).getAsJsonObject());
         } catch (Exception e) {
-            //create new file when file is not exists
+            //create new file when corrupted or file is not exists
             setJsonObject(new JsonObject());
         }
     }
@@ -37,7 +35,9 @@ public class JsonConfigFile extends JsonConfigEntry implements IConfigFile {
     @Override
     public void save(OutputStream os) throws IOException {
         try {
-            os.write(getJsonObject().toString().trim().getBytes());
+            Gson gson = new Gson();
+
+            os.write(gson.toJson(getJsonObject()).getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }

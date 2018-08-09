@@ -39,26 +39,25 @@ public class ModDataStorage extends Storage<byte[]> {
 
     @Override
     public byte[] getSync(String name) throws IOException {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 
-        File file = getFile(name);
+            File file = getFile(name);
 
-        file.getParentFile().mkdirs();
+            file.getParentFile().mkdirs();
 
-        if (!file.exists()) {
-            file.createNewFile();
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(file))) {
+                byte[] readBuffer = new byte[2048];
+                int readedLength;
+                while ((readedLength = input.read(readBuffer, 0, readBuffer.length)) != -1) {
+                    output.write(readBuffer, 0, readedLength);
+                }
+            }
+
+            return output.toByteArray();
         }
-
-        BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
-
-        byte[] readBuffer = new byte[2048];
-        while (input.read(readBuffer, 0, readBuffer.length) != -1) {
-            output.write(readBuffer);
-        }
-
-        input.close();
-        output.close();
-
-        return output.toByteArray();
     }
 }
