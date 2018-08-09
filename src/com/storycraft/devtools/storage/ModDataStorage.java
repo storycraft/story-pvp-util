@@ -43,9 +43,7 @@ public class ModDataStorage extends Storage<byte[]> {
 
         File file = getFile(name);
 
-        if (!file.getParentFile().exists()){
-            file.getParentFile().mkdirs();
-        }
+        file.getParentFile().mkdirs();
 
         if (!file.exists()) {
             file.createNewFile();

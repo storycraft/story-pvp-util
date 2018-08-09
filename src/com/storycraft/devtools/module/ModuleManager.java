@@ -1,14 +1,16 @@
 package com.storycraft.devtools.module;
 
 import com.storycraft.devtools.DevTools;
+import com.storycraft.devtools.module.chat.ChatOptimize;
 import com.storycraft.devtools.module.fullscreen.FullscreenCursorConfine;
 import com.storycraft.devtools.module.hitsound.PlayerHitSound;
 import com.storycraft.devtools.module.render.ClientPlayerNameTag;
 import com.storycraft.devtools.module.render.DynamicBoundingBox;
 import com.storycraft.devtools.module.render.LabelBoxRenderToggle;
-import com.storycraft.devtools.module.resourcepack.ServerResourcePackBypass;
+import com.storycraft.devtools.module.server.ServerResourcePackBypass;
 import com.storycraft.devtools.module.screenshot.AsyncScreenshot;
 import com.storycraft.devtools.module.session.SessionRefresh;
+import com.storycraft.devtools.module.taboverlay.TabOptimize;
 import com.storycraft.devtools.util.Parallel;
 
 import java.util.HashMap;
@@ -40,6 +42,9 @@ public class ModuleManager {
         addModule("label_box_render_toggle", new LabelBoxRenderToggle());
         addModule("dynamic_boundingbox", new DynamicBoundingBox());
 
+        addModule("chat_optimize", new ChatOptimize());
+        addModule("tab_optimize", new TabOptimize());
+
         addModule("server_resourcepacks_bypass", new ServerResourcePackBypass());
     }
 
@@ -58,12 +63,17 @@ public class ModuleManager {
         if (contains(name))
             getMod().getLogger().warning("module " + name + " is already loaded");
 
-        if (getMod().isInited())
+        if (getMod().isInited()) {
             module.preInitialize();
+        }
 
-        if (getMod().isInited())
+        if (getMod().isLoaded()) {
             module.initialize(getMod());
+        }
 
+        if (getMod().isPostLoaded()) {
+            module.postInitialize();
+        }
 
         moduleMap.put(name, module);
     }

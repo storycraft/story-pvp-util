@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.util.logging.Logger;
@@ -21,12 +22,14 @@ public class DevTools implements IStoryMod {
 
     private static boolean isInited;
     private static boolean isLoaded;
+    private static boolean isPostLoaded;
     private static ModMetadata metadata;
     private static JsonConfigFile defaultConfig;
 
     static {
         isInited = false;
         isLoaded = false;
+        isPostLoaded = false;
     }
 
     public static boolean isModInited(){
@@ -59,7 +62,7 @@ public class DevTools implements IStoryMod {
     private ModuleManager moduleManager;
 
     public DevTools() {
-        this.instance = instance;
+        this.instance = this;
         this.logger = Logger.getLogger("minecraft");
         this.moduleManager = new ModuleManager(this);
         this.registryManager = new RegistryManager(this);
@@ -91,6 +94,7 @@ public class DevTools implements IStoryMod {
 
     @Mod.EventHandler
     public void postInitialize(FMLLoadCompleteEvent e) {
+        isPostLoaded = true;
         getModuleManager().postInitialize();
     }
 
@@ -125,6 +129,11 @@ public class DevTools implements IStoryMod {
     @Override
     public boolean isLoaded(){
         return isLoaded;
+    }
+
+    @Override
+    public boolean isPostLoaded(){
+        return isPostLoaded;
     }
 
     @Override

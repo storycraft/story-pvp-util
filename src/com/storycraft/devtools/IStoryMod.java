@@ -24,4 +24,5 @@ public interface IStoryMod {
 
     boolean isInited();
     boolean isLoaded();
+    boolean isPostLoaded();
 }

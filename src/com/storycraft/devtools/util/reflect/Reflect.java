@@ -3,10 +3,17 @@ package com.storycraft.devtools.util.reflect;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Reflect {
+
+    private static final WrappedField<Integer, Field> modifiersField;
+
+    static {
+        modifiersField = getField(Field.class, "modifiers");
+    }
 
     public static <T, C>WrappedField<T, C> getField(Object obj, String name) {
         return (WrappedField<T, C>) getField(obj.getClass(), obj, name);
@@ -32,6 +39,9 @@ public class Reflect {
         try {
             Field field = c.getDeclaredField(name);
             field.setAccessible(true);
+
+            if (Modifier.isFinal(field.getModifiers()))
+                modifiersField.set(field, field.getModifiers() & ~Modifier.FINAL);
 
             return field;
         } catch (NoSuchFieldException e) {

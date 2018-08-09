@@ -46,13 +46,15 @@ public class DynamicBoundingBox implements IModule {
         isEyePosDrawingEnabled();
         isProjectileBoundingBoxEnabled();
         isNonLivingBoundingBoxEnabled();
+
+        dynamicRenderManager = new DynamicRenderManager(minecraft.getTextureManager(), minecraft.getRenderItem(), this);
+        renderManagerField.set(minecraft, dynamicRenderManager);
+        renderManagerGlobalField.set(minecraft.renderGlobal, dynamicRenderManager);
     }
 
     @Override
     public void postInitialize() {
-        dynamicRenderManager = new DynamicRenderManager(minecraft.getTextureManager(), minecraft.getRenderItem(), this);
-        renderManagerField.set(minecraft, dynamicRenderManager);
-        renderManagerGlobalField.set(minecraft.renderGlobal, dynamicRenderManager);
+
     }
 
     public boolean isAimHighlightEnabled() {
