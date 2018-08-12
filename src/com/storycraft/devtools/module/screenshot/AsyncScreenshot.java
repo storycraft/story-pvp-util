@@ -88,7 +88,7 @@ public class AsyncScreenshot implements IModule {
     }
 
     @SubscribeEvent
-    public void onScreenshotHit(TickEvent.ClientTickEvent e){
+    public void onScreenshotHit(InputEvent.KeyInputEvent e){
         if (!hookedKeyBinding.isKeyDown() || glWorking)
             return;
 
