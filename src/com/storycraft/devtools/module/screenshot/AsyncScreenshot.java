@@ -1,5 +1,6 @@
 package com.storycraft.devtools.module.screenshot;
 
+import com.google.common.primitives.Ints;
 import com.storycraft.devtools.DevTools;
 import com.storycraft.devtools.config.IConfigEntry;
 import com.storycraft.devtools.config.json.JsonConfigEntry;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 public class AsyncScreenshot implements IModule {
@@ -164,6 +167,7 @@ public class AsyncScreenshot implements IModule {
                 File screenshotFile;
 
                 try {
+                    Collections.reverse(Ints.asList(cachedPixelValues));
                     BufferedImage bufferedimage = new BufferedImage(screenWidth, screenHeight, Image.SCALE_DEFAULT);
                     bufferedimage.setRGB(0, 0, screenWidth, screenHeight, cachedPixelValues, 0, screenWidth);
                     screenshotFile = getScreenshotFile(screenshotFolder, new Date());
