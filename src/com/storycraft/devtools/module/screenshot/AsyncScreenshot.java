@@ -16,10 +16,13 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
@@ -40,6 +43,7 @@ public class AsyncScreenshot implements IModule {
     private DevTools mod;
 
     private boolean glWorking;
+    private boolean asyncEnabled;
 
     private IntBuffer cachedPixelBuffer = null;
     private int[] cachedPixelValues = null;
@@ -52,8 +56,6 @@ public class AsyncScreenshot implements IModule {
 
         MinecraftForge.EVENT_BUS.register(this);
         this.hookedKeyBinding = bindScreenshotKey();
-
-        glWorking = false;
     }
 
     @Override
@@ -61,7 +63,8 @@ public class AsyncScreenshot implements IModule {
         this.mod = mod;
 
         //update config before start
-        isModEnabled();
+        this.glWorking = false;
+        this.asyncEnabled = isModEnabled();
     }
 
     private KeyBinding bindScreenshotKey() {
@@ -85,13 +88,13 @@ public class AsyncScreenshot implements IModule {
     }
 
     @SubscribeEvent
-    public void onScreenshotHit(InputEvent.KeyInputEvent e) {
-        if (!hookedKeyBinding.isKeyDown() && !glWorking)
+    public void onScreenshotHit(TickEvent.ClientTickEvent e){
+        if (!hookedKeyBinding.isKeyDown() || glWorking)
             return;
 
         glWorking = true;
 
-        if (isModEnabled()) {
+        if (asyncEnabled) {
             saveScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()).run();
         }
         else {
@@ -99,6 +102,11 @@ public class AsyncScreenshot implements IModule {
         }
 
         glWorking = false;
+    }
+
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+        this.asyncEnabled = isModEnabled();
     }
 
     public AsyncTask saveScreenshot(int width, int height, Framebuffer buffer) {

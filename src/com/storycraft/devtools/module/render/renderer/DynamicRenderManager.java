@@ -27,6 +27,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class DynamicRenderManager extends RenderManager {
 
+    private static Reflect.WrappedField<Boolean, RenderManager> renderOutlines;
+
+    static {
+        renderOutlines = Reflect.getField(RenderManager.class, "renderOutlines", "field_178639_r");
+    }
+
     private DynamicBoundingBox dynamicBoundingBox;
 
     private boolean isAimHighlightEnabled;
@@ -37,6 +43,12 @@ public class DynamicRenderManager extends RenderManager {
     private boolean isEyePosDrawingEnabled;
     private boolean isProjectileBoundingBoxEnabled;
     private boolean isNonLivingBoundingBoxEnabled;
+
+    public DynamicRenderManager(TextureManager renderEngineIn, RenderItem itemRendererIn, DynamicBoundingBox dynamicBoundingBox) {
+        super(renderEngineIn, itemRendererIn);
+
+        this.dynamicBoundingBox = dynamicBoundingBox;
+    }
 
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
@@ -52,18 +64,6 @@ public class DynamicRenderManager extends RenderManager {
         this.isEyePosDrawingEnabled = dynamicBoundingBox.isEyePosDrawingEnabled();
         this.isProjectileBoundingBoxEnabled = dynamicBoundingBox.isProjectileBoundingBoxEnabled();
         this.isNonLivingBoundingBoxEnabled = dynamicBoundingBox.isNonLivingBoundingBoxEnabled();
-    }
-
-    private static Reflect.WrappedField<Boolean, RenderManager> renderOutlines;
-
-    static {
-        renderOutlines = Reflect.getField(RenderManager.class, "renderOutlines", "field_178639_r");
-    }
-
-    public DynamicRenderManager(TextureManager renderEngineIn, RenderItem itemRendererIn, DynamicBoundingBox dynamicBoundingBox) {
-        super(renderEngineIn, itemRendererIn);
-
-        this.dynamicBoundingBox = dynamicBoundingBox;
     }
 
     @Override

@@ -7,8 +7,10 @@ import com.storycraft.devtools.util.reflect.Reflect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.Display;
 
 public class FullscreenCursorConfine implements IModule {
@@ -27,6 +29,8 @@ public class FullscreenCursorConfine implements IModule {
     private Minecraft minecraft;
     private KeyBinding fullscreenToggle;
 
+    private boolean confineCursorToScreen;
+
     @Override
     public void preInitialize() {
         this.minecraft = Minecraft.getMinecraft();
@@ -38,7 +42,12 @@ public class FullscreenCursorConfine implements IModule {
     public void initialize(DevTools mod) {
         this.mod = mod;
 
-        isModEnabled();
+        this.confineCursorToScreen = isModEnabled();
+    }
+
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+        this.confineCursorToScreen = isModEnabled();
     }
 
     @Override
@@ -86,14 +95,14 @@ public class FullscreenCursorConfine implements IModule {
     }
 
     @SubscribeEvent
-    public void onFullscreenSwitch(InputEvent.KeyInputEvent e){
+    public void onScreenshotHit(TickEvent.ClientTickEvent e){
         if (fullscreenToggle.isPressed()){
             toggleFullscreen();
         }
     }
 
     private void toggleFullscreen() {
-        if (!isModEnabled()){
+        if (!confineCursorToScreen){
             if (!minecraft.isFullScreen()){
                 try {
                     Display.setLocation(0, 0);

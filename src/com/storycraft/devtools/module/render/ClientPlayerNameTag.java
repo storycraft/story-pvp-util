@@ -65,7 +65,7 @@ public class ClientPlayerNameTag implements IModule {
 
     @SubscribeEvent
     public void onConfigUpdate(ConfigChangedEvent.OnConfigChangedEvent e) {
-        modEnabled = isModEnabled();
+        this.modEnabled = isModEnabled();
     }
 
     @SubscribeEvent
