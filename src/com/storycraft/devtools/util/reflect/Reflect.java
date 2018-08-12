@@ -1,6 +1,7 @@
 package com.storycraft.devtools.util.reflect;
 
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import sun.reflect.Reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +36,6 @@ public class Reflect {
 
     private static Field getDeclaredField(Class<?> c, String... nameList) {
         Field field = ReflectionHelper.findField(c, nameList);
-        field.setAccessible(true);
 
         if (Modifier.isFinal(field.getModifiers()))
             modifiersField.set(field, field.getModifiers() & ~Modifier.FINAL);
@@ -43,13 +43,12 @@ public class Reflect {
         return field;
     }
 
-    public static <T, C>WrappedMethod<T, C> getMethod(Class<?> c, String[] nameList, Class... params) {
+    public static <T, C>WrappedMethod<T, C> getMethod(Class<C> c, String[] nameList, Class... params) {
         return (WrappedMethod<T, C>) getMethod(c, null, nameList, params);
     }
 
     public static <T, C>WrappedMethod<T, C> getMethod(Class<C> c, C obj, String[] nameList, Class... params) {
         Method method = ReflectionHelper.findMethod(c, obj, nameList, params);
-        method.setAccessible(true);
 
         return new WrappedMethod<>(method);
     }

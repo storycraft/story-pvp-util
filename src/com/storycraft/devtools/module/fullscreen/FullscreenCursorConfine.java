@@ -22,7 +22,7 @@ public class FullscreenCursorConfine implements IModule {
 
     static {
         fullscreen = Reflect.getField(Minecraft.class, "fullscreen", "field_71431_Q");
-        updateDisplayMode = Reflect.getMethod(Minecraft.class, Minecraft.getMinecraft(), new String[]{"updateDisplayMode", "func_110441_Q"});
+        updateDisplayMode = Reflect.getMethod(Minecraft.class, new String[]{"updateDisplayMode", "func_110441_Q"});
     }
 
     private DevTools mod;
