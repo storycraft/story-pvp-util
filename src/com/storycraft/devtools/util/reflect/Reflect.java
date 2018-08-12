@@ -1,7 +1,6 @@
 package com.storycraft.devtools.util.reflect;
 
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
-import sun.reflect.Reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

@@ -14,6 +14,7 @@ import net.minecraft.event.ClickEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -89,6 +90,23 @@ public class AsyncScreenshot implements IModule {
 
     @SubscribeEvent
     public void onScreenshotHit(InputEvent.KeyInputEvent e){
+        if (!hookedKeyBinding.isKeyDown() || glWorking)
+            return;
+
+        glWorking = true;
+
+        if (asyncEnabled) {
+            saveScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()).run();
+        }
+        else {
+            saveScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()).run().join();
+        }
+
+        glWorking = false;
+    }
+
+    @SubscribeEvent
+    public void onScreenshotHit(GuiScreenEvent.KeyboardInputEvent.Post e){
         if (!hookedKeyBinding.isKeyDown() || glWorking)
             return;
 
