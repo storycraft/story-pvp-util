@@ -16,6 +16,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -72,6 +73,21 @@ public class OptimizedInput implements IModule {
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
         this.isEnabled = isModEnabled();
+
+        if (!isEnabled)
+            return;
+
+        if (minecraft.currentScreen != null) {
+            if (!minecraft.currentScreen.allowUserInput) {
+                this.updateInput = false;
+                return;
+            }
+            else {
+                minecraft.currentScreen.allowUserInput = false;
+            }
+        }
+
+        this.updateInput = true;
     }
 
     @SubscribeEvent
@@ -86,13 +102,18 @@ public class OptimizedInput implements IModule {
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void abortMouseEvent(MouseEvent e) {
+        if (isEnabled && e.isCancelable() && !e.isCanceled())
+            e.setCanceled(true);
+    }
+
     private void updateInput() throws IOException {
         if (this.updateInput) {
+            System.out.println("asd");
             minecraft.mcProfiler.endStartSection("mouse");
 
             while (Mouse.next()) {
-                if (net.minecraftforge.client.ForgeHooksClient.postMouseEvent()) continue;
-
                 int i = Mouse.getEventButton();
                 KeyBinding.setKeyBindState(i - 100, Mouse.getEventButtonState());
 
