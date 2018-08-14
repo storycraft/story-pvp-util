@@ -9,6 +9,7 @@ import com.storycraft.devtools.util.AsyncTask;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.event.ClickEvent;
@@ -167,9 +168,22 @@ public class AsyncScreenshot implements IModule {
                 File screenshotFile;
 
                 try {
-                    Collections.reverse(Ints.asList(cachedPixelValues));
                     BufferedImage bufferedimage = new BufferedImage(screenWidth, screenHeight, Image.SCALE_DEFAULT);
-                    bufferedimage.setRGB(0, 0, screenWidth, screenHeight, cachedPixelValues, 0, screenWidth);
+
+                    if (OpenGlHelper.isFramebufferEnabled()){
+                        int j = buffer.framebufferTextureHeight - buffer.framebufferHeight;
+                        for (int k = j; k < buffer.framebufferTextureHeight; ++k)
+                        {
+                            for (int l = 0; l < buffer.framebufferWidth; ++l)
+                            {
+                                bufferedimage.setRGB(l, k - j, cachedPixelValues[k * buffer.framebufferTextureWidth + l]);
+                            }
+                        }
+                    }
+                    else {
+                        bufferedimage.setRGB(0, 0, screenWidth, screenHeight, cachedPixelValues, 0, screenWidth);
+                    }
+
                     screenshotFile = getScreenshotFile(screenshotFolder, new Date());
 
                     ImageIO.write(bufferedimage, "png", screenshotFile);
