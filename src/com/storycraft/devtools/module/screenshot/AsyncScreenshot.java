@@ -10,12 +10,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ScreenShotHelper;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
@@ -150,13 +152,13 @@ public class AsyncScreenshot implements IModule {
             cachedPixelValues = new int[size];
         }
 
-        GL11.glPixelStorei(3333, 1);
-        GL11.glPixelStorei(3317, 1);
+        GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
+        GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
         cachedPixelBuffer.clear();
 
         if (OpenGlHelper.isFramebufferEnabled()) {
             GlStateManager.bindTexture(buffer.framebufferTexture);
-            GL11.glGetTexImage(3553, 0, 32993, 33639, cachedPixelBuffer);
+            GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, 32993, 33639, cachedPixelBuffer);
         } else {
             GL11.glReadPixels(0, 0, width, height, 32993, 33639, cachedPixelBuffer);
         }
@@ -167,22 +169,12 @@ public class AsyncScreenshot implements IModule {
             public Void get() {
                 File screenshotFile;
 
+                TextureUtil.processPixelValues(cachedPixelValues, screenWidth, screenHeight);
+
                 try {
                     BufferedImage bufferedimage = new BufferedImage(screenWidth, screenHeight, Image.SCALE_DEFAULT);
 
-                    if (OpenGlHelper.isFramebufferEnabled()){
-                        int j = buffer.framebufferTextureHeight - buffer.framebufferHeight;
-                        for (int k = j; k < buffer.framebufferTextureHeight; ++k)
-                        {
-                            for (int l = 0; l < buffer.framebufferWidth; ++l)
-                            {
-                                bufferedimage.setRGB(l, k - j, cachedPixelValues[k * buffer.framebufferTextureWidth + l]);
-                            }
-                        }
-                    }
-                    else {
-                        bufferedimage.setRGB(0, 0, screenWidth, screenHeight, cachedPixelValues, 0, screenWidth);
-                    }
+                    bufferedimage.setRGB(0, 0, screenWidth, screenHeight, cachedPixelValues, 0, screenWidth);
 
                     screenshotFile = getScreenshotFile(screenshotFolder, new Date());
 
