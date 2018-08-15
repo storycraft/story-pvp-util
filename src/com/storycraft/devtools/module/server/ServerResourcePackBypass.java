@@ -1,5 +1,7 @@
 package com.storycraft.devtools.module.server;
 
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -16,8 +18,10 @@ import net.minecraft.client.resources.data.IMetadataSerializer;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.util.HttpUtil;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Ref;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -94,9 +98,40 @@ public class ServerResourcePackBypass implements IModule {
                 }
 
                 final File file1 = new File(dirServerResourcepacks.get(this), s);
+
+                if (file1.exists() && hash.length() == 40)
+                {
+                    try
+                    {
+                        String s1 = Hashing.sha1().hashBytes(Files.toByteArray(file1)).toString();
+
+                        if (s1.equals(hash))
+                        {
+                            return minecraft.addScheduledTask(() -> {});
+                        }
+
+                        mod.getLogger().warning("File " + file1 + " had wrong hash (expected " + hash + ", found " + s1 + "). Deleting it.");
+                        FileUtils.deleteQuietly(file1);
+                    }
+                    catch (IOException ioexception)
+                    {
+                        mod.getLogger().warning("File " + file1 + " couldn\'t be hashed. Deleting it. " + ioexception.getLocalizedMessage());
+                        FileUtils.deleteQuietly(file1);
+                    }
+                }
+
                 GuiScreenWorking guiscreenworking = new GuiScreenWorking();
 
+                Futures.getUnchecked(minecraft.addScheduledTask(new Runnable()
+                {
+                    public void run()
+                    {
+                        minecraft.displayGuiScreen(guiscreenworking);
+                    }
+                }));
+
                 final SettableFuture<Object> settablefuture = SettableFuture.<Object>create();
+
                 Map<String, String> map = Minecraft.getSessionInfo();
                 ListenableFuture<Object> downloadTask = HttpUtil.downloadResourcePack(file1, url, map, 52428800, guiscreenworking, minecraft.getProxy());
                 Futures.addCallback(downloadTask, new FutureCallback<Object>()

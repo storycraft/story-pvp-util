@@ -16,6 +16,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -67,7 +68,7 @@ public class OptimizedInput implements IModule {
         MinecraftForge.EVENT_BUS.register(this);
 
         this.isEnabled = isModEnabled();
-        this.updateInput = true;
+        updateGui(minecraft.currentScreen);
     }
 
     @SubscribeEvent
@@ -77,17 +78,7 @@ public class OptimizedInput implements IModule {
         if (!isEnabled)
             return;
 
-        if (minecraft.currentScreen != null) {
-            if (!minecraft.currentScreen.allowUserInput) {
-                this.updateInput = false;
-                return;
-            }
-            else {
-                minecraft.currentScreen.allowUserInput = false;
-            }
-        }
-
-        this.updateInput = true;
+        updateGui(minecraft.currentScreen);
     }
 
     @SubscribeEvent
@@ -110,7 +101,6 @@ public class OptimizedInput implements IModule {
 
     private void updateInput() throws IOException {
         if (this.updateInput) {
-            System.out.println("asd");
             minecraft.mcProfiler.endStartSection("mouse");
 
             while (Mouse.next()) {
@@ -325,33 +315,37 @@ public class OptimizedInput implements IModule {
             }
 
             sendClickBlockToController.invoke(minecraft, minecraft.currentScreen == null && minecraft.gameSettings.keyBindAttack.isKeyDown() && minecraft.inGameHasFocus);
-        }
 
-        NetworkManager networkManager = myNetworkManager.get(minecraft);
+            NetworkManager networkManager = myNetworkManager.get(minecraft);
 
-        if (minecraft.theWorld == null && networkManager != null)
-        {
-            minecraft.mcProfiler.endStartSection("pendingConnection");
-            networkManager.processReceivedPackets();
+            if (minecraft.theWorld == null && networkManager != null)
+            {
+                minecraft.mcProfiler.endStartSection("pendingConnection");
+                networkManager.processReceivedPackets();
+            }
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onGuiOpen(GuiOpenEvent e){
+    public void onGuiOpen(GuiScreenEvent e){
         if (!isEnabled)
             return;
 
-        if (e.gui != null) {
-            if (!e.gui.allowUserInput) {
+        updateGui(e.gui);
+    }
+
+    public void updateGui(GuiScreen currentScreen) {
+        if (currentScreen != null) {
+            if (!currentScreen.allowUserInput) {
                 this.updateInput = false;
                 return;
             }
             else {
-                e.gui.allowUserInput = false;
+                currentScreen.allowUserInput = false;
             }
         }
 
-       this.updateInput = true;
+        this.updateInput = true;
     }
 
 
