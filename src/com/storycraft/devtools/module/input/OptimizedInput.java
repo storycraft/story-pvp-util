@@ -20,6 +20,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -68,7 +69,6 @@ public class OptimizedInput implements IModule {
         MinecraftForge.EVENT_BUS.register(this);
 
         this.isEnabled = isModEnabled();
-        updateGui(minecraft.currentScreen);
     }
 
     @SubscribeEvent
@@ -95,7 +95,7 @@ public class OptimizedInput implements IModule {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void abortMouseEvent(MouseEvent e) {
-        if (isEnabled && e.isCancelable() && !e.isCanceled())
+        if (isEnabled && updateInput && !e.isCanceled())
             e.setCanceled(true);
     }
 
@@ -327,7 +327,7 @@ public class OptimizedInput implements IModule {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onGuiOpen(GuiScreenEvent e){
+    public void onGuiOpen(GuiOpenEvent e){
         if (!isEnabled)
             return;
 
