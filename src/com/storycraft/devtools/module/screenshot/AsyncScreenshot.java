@@ -95,25 +95,8 @@ public class AsyncScreenshot implements IModule {
     }
 
     @SubscribeEvent
-    public void onScreenshotHit(InputEvent.KeyInputEvent e){
-        if (!hookedKeyBinding.isKeyDown() || glWorking)
-            return;
-
-        glWorking = true;
-
-        if (asyncEnabled) {
-            saveScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()).run();
-        }
-        else {
-            saveScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()).run().join();
-        }
-
-        glWorking = false;
-    }
-
-    @SubscribeEvent
-    public void onScreenshotHit(GuiScreenEvent.KeyboardInputEvent.Post e){
-        if (!hookedKeyBinding.isKeyDown() || glWorking)
+    public void onScreenshotHit(TickEvent.ClientTickEvent e){
+        if (!hookedKeyBinding.isPressed() || glWorking)
             return;
 
         glWorking = true;

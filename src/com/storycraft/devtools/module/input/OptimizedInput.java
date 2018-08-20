@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MouseHelper;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.MouseEvent;
@@ -69,19 +70,16 @@ public class OptimizedInput implements IModule {
         MinecraftForge.EVENT_BUS.register(this);
 
         this.isEnabled = isModEnabled();
+        updateGui(minecraft.currentScreen);
     }
 
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
         this.isEnabled = isModEnabled();
-
-        if (!isEnabled)
-            return;
-
         updateGui(minecraft.currentScreen);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onUpdateTick(TickEvent.ClientTickEvent e) {
         if (e.phase != TickEvent.Phase.START || !isEnabled)
             return;
@@ -95,7 +93,7 @@ public class OptimizedInput implements IModule {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void abortMouseEvent(MouseEvent e) {
-        if (isEnabled && updateInput && !e.isCanceled())
+        if (isEnabled && updateInput)
             e.setCanceled(true);
     }
 
@@ -139,8 +137,6 @@ public class OptimizedInput implements IModule {
                 } else if (minecraft.currentScreen != null) {
                     minecraft.currentScreen.handleMouseInput();
                 }
-
-                net.minecraftforge.fml.common.FMLCommonHandler.instance().fireMouseInput();
             }
 
             minecraft.mcProfiler.endStartSection("keyboard");
@@ -253,7 +249,6 @@ public class OptimizedInput implements IModule {
                     }
 
                 }
-                net.minecraftforge.fml.common.FMLCommonHandler.instance().fireKeyInput();
             }
 
             for (int l = 0; l < 9; ++l) {
@@ -335,17 +330,12 @@ public class OptimizedInput implements IModule {
     }
 
     public void updateGui(GuiScreen currentScreen) {
-        if (currentScreen != null) {
-            if (!currentScreen.allowUserInput) {
-                this.updateInput = false;
-                return;
-            }
-            else {
-                currentScreen.allowUserInput = false;
-            }
+        if (!isEnabled || currentScreen != null && !currentScreen.allowUserInput) {
+            this.updateInput = false;
         }
-
-        this.updateInput = true;
+        else {
+            this.updateInput = true;
+        }
     }
 
 
@@ -353,11 +343,7 @@ public class OptimizedInput implements IModule {
         if (!getModuleConfigEntry().contains("fast_input_update"))
             getModuleConfigEntry().set("fast_input_update", true);
 
-        if (getModuleConfigEntry().get("fast_input_update").getAsBoolean()) {
-            return true;
-        }
-
-        return false;
+        return getModuleConfigEntry().get("fast_input_update").getAsBoolean();
     }
 
     public JsonConfigEntry getModuleConfigEntry(){

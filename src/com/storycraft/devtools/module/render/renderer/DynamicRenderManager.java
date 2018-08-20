@@ -110,12 +110,8 @@ public class DynamicRenderManager extends RenderManager {
                     {
                         if (entity instanceof EntityLiving || entity instanceof EntityOtherPlayerMP || isProjectileBoundingBoxEnabled && entity instanceof IProjectile || isNonLivingBoundingBoxEnabled) {
                             if (isHideRequired) {
-                                if (!entity.isEntityAlive())
-                                    return true;
-
-                                int limit = dynamicBoundingBox.getBoundingBoxDistance();
-                                int sqLimit = limit * limit;
-                                double distanceSq = livingPlayer.getDistanceSqToEntity(entity);
+                                int sqLimit = boundingBoxDistance * boundingBoxDistance;
+                                double distanceSq = livingPlayer.getDistanceSq(entity.posX, entity.posY, entity.posZ);
 
                                 if (isHideNearOrFar) {
                                     if (distanceSq < sqLimit)
