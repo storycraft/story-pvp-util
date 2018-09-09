@@ -40,7 +40,7 @@ public class PlayerHitSound implements IModule {
     }
 
     @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent e) {
+    public void onConfigChanged(ConfigChangedEvent.PostConfigChangedEvent e) {
         this.soundEnabled = isModEnabled();
     }
 

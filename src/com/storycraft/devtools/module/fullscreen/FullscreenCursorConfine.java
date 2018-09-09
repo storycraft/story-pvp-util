@@ -46,7 +46,7 @@ public class FullscreenCursorConfine implements IModule {
     }
 
     @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+    public void onConfigChanged(ConfigChangedEvent.PostConfigChangedEvent e){
         this.confineCursorToScreen = isModEnabled();
     }
 

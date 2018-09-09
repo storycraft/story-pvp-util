@@ -7,6 +7,7 @@ import com.storycraft.devtools.config.json.JsonConfigEntry;
 import com.storycraft.devtools.module.IModule;
 import com.storycraft.devtools.util.AsyncTask;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -55,6 +56,8 @@ public class AsyncScreenshot implements IModule {
     private IntBuffer cachedPixelBuffer = null;
     private int[] cachedPixelValues = null;
 
+    private boolean pressed;
+
     private KeyBinding hookedKeyBinding;
 
     @Override
@@ -62,6 +65,7 @@ public class AsyncScreenshot implements IModule {
         this.minecraft = Minecraft.getMinecraft();
 
         MinecraftForge.EVENT_BUS.register(this);
+        this.pressed = false;
         this.hookedKeyBinding = bindScreenshotKey();
     }
 
@@ -96,7 +100,23 @@ public class AsyncScreenshot implements IModule {
 
     @SubscribeEvent
     public void onScreenshotHit(TickEvent.ClientTickEvent e){
-        if (!hookedKeyBinding.isPressed() || glWorking)
+        if (e.phase != TickEvent.Phase.END)
+            return;
+
+        if (hookedKeyBinding.isKeyDown()) {
+            if (!pressed) {
+                onScreenshotPressed(e);
+                pressed = true;
+            }
+        }
+        else {
+            if (pressed)
+                pressed = false;
+        }
+    }
+
+    private void onScreenshotPressed(TickEvent.ClientTickEvent e) {
+        if (glWorking)
             return;
 
         glWorking = true;
@@ -112,7 +132,7 @@ public class AsyncScreenshot implements IModule {
     }
 
     @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+    public void onConfigChanged(ConfigChangedEvent.PostConfigChangedEvent e){
         this.asyncEnabled = isModEnabled();
     }
 

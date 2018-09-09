@@ -65,7 +65,7 @@ public class ChatOptimize implements IModule {
     }
 
     @SubscribeEvent
-    public void onConfigUpdate(ConfigChangedEvent.OnConfigChangedEvent e){
+    public void onConfigUpdate(ConfigChangedEvent.PostConfigChangedEvent e){
         this.isBackgroundEnabled = isBackgroundEnabled();
         this.isShadowEnabled = isShadowEnabled();
         this.isAlphaFakeDisabled = isAlphaFakeDisabled();

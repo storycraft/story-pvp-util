@@ -4,7 +4,6 @@ import com.storycraft.devtools.DevTools;
 import com.storycraft.devtools.module.chat.ChatOptimize;
 import com.storycraft.devtools.module.fullscreen.FullscreenCursorConfine;
 import com.storycraft.devtools.module.hitsound.PlayerHitSound;
-import com.storycraft.devtools.module.input.OptimizedInput;
 import com.storycraft.devtools.module.render.ClientPlayerNameTag;
 import com.storycraft.devtools.module.render.DynamicBoundingBox;
 import com.storycraft.devtools.module.render.LabelBoxRenderToggle;
@@ -47,8 +46,6 @@ public class ModuleManager {
         addModule("tab_optimize", new TabOptimize());
 
         addModule("server_resourcepacks_bypass", new ServerResourcePackBypass());
-
-        addModule("optimized_input_update", new OptimizedInput());
     }
 
     public DevTools getMod() {

@@ -53,7 +53,7 @@ public class TabOptimize implements IModule {
     }
 
     @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e){
+    public void onConfigChanged(ConfigChangedEvent.PostConfigChangedEvent e){
         this.isNumberMode = isNumberMode();
     }
 
