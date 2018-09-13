@@ -1,8 +1,8 @@
 [
 {
-  "modid": "story-dev-tools",
-  "name": "storycraft DevTools",
-  "description": "storycraft's DevTools",
+  "modid": "story-pvp-util",
+  "name": "storycraft's pvp util",
+  "description": "A simple minecraft mod that can help pvp",
   "version": "0.1",
   "mcversion": "${mcversion}",
   "url": "",
