@@ -36,7 +36,7 @@ public class DynamicBoundingBox implements IModule {
     public void initialize(PvpUtil mod) {
         this.mod = mod;
 
-        dynamicRenderManager = new DynamicRenderManager(minecraft.getRenderManager().renderEngine, minecraft.getRenderItem(), this);
+        dynamicRenderManager = new DynamicRenderManager(minecraft.getTextureManager(), minecraft.getRenderItem(), this);
         renderManagerField.set(minecraft, dynamicRenderManager);
         renderManagerGlobalField.set(minecraft.renderGlobal, dynamicRenderManager);
 
