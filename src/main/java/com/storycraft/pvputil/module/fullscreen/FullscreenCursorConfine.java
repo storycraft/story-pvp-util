@@ -134,6 +134,9 @@ public class FullscreenCursorConfine implements IModule {
     }
 
     private void toggleFullscreen() {
+        lastX = Display.getX();
+        lastY = Display.getY();
+
         if (!confineCursorToScreen && !minecraft.isFullScreen()){
             try {
 
@@ -158,8 +161,5 @@ public class FullscreenCursorConfine implements IModule {
             if (!minecraft.isFullScreen())
                 Display.setLocation(lastX, lastY);
         }
-
-        lastX = Display.getX();
-        lastY = Display.getY();
     }
 }
