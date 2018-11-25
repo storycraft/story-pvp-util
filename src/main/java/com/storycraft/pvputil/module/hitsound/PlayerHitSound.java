@@ -36,13 +36,6 @@ public class PlayerHitSound implements IModule {
 
     @Override
     public void preInitialize() {
-        MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    @Override
-    public void initialize(PvpUtil mod) {
-        this.mod = mod;
-
         this.soundHitNormalLoc = new ResourceLocation("storycraft", "hitnormal");
         this.soundHitClapLoc = new ResourceLocation("storycraft", "hitclap");
         this.soundHitFinishLoc = new ResourceLocation("storycraft", "hitfinish");
@@ -50,6 +43,13 @@ public class PlayerHitSound implements IModule {
         this.soundHitNormal = new SoundEvent(soundHitNormalLoc);
         this.soundHitClap = new SoundEvent(soundHitClapLoc);
         this.soundHitFinish = new SoundEvent(soundHitFinishLoc);
+        
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @Override
+    public void initialize(PvpUtil mod) {
+        this.mod = mod;
 
         this.soundEnabled = isModEnabled();
         this.newDisabled = isNewHitsoundDisabled();
