@@ -166,7 +166,7 @@ public class DynamicRenderManager extends RenderManager {
 
         Entity[] aentity = entityIn.getParts();
 
-        if (isPartDrawingEnabled || aentity != null)
+        if (aentity != null && isPartDrawingEnabled)
         {
 
             for (Entity entity : aentity)

@@ -3,7 +3,7 @@ package com.storycraft.pvputil.module.hitsound;
 import com.storycraft.pvputil.PvpUtil;
 import com.storycraft.pvputil.config.json.JsonConfigEntry;
 import com.storycraft.pvputil.module.IModule;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -23,6 +23,9 @@ public class PlayerHitSound implements IModule {
     private ResourceLocation soundHitNormalLoc;
     private ResourceLocation soundHitFinishLoc;
 
+    private SoundEvent soundHitNormal;
+    private SoundEvent soundHitFinish;
+
     @Override
     public void preInitialize() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -35,17 +38,21 @@ public class PlayerHitSound implements IModule {
         this.soundHitNormalLoc = new ResourceLocation("storycraft", "hitnormal");
         this.soundHitFinishLoc = new ResourceLocation("storycraft", "hitfinish");
 
+        this.soundHitNormal = new SoundEvent(soundHitNormalLoc);
+        this.soundHitFinish = new SoundEvent(soundHitFinishLoc);
+
         this.soundEnabled = isModEnabled();
     }
 
     @SubscribeEvent
     public void onLeftInteract(AttackEntityEvent e){
-        if (e.getEntityLiving() == null || e.getTarget() instanceof EntityPlayerSP || !soundEnabled){
+        if (e.getEntityLiving() == null || !e.getEntityPlayer().isUser() || !soundEnabled){
             return;
         }
 
-        SoundEvent sound = new SoundEvent(e.getEntityLiving().isEntityAlive() ? this.soundHitNormalLoc : this.soundHitFinishLoc);
-        e.getEntityLiving().getEntityWorld().playSound(e.getEntityPlayer(), e.getEntityLiving().posX, e.getEntityLiving().posY, e.getEntityLiving().posZ, sound, SoundCategory.PLAYERS, 1f, 1f);
+        EntityLivingBase living = e.getEntityLiving();
+        SoundEvent sound = e.getEntityLiving().isEntityAlive() ? this.soundHitNormal : this.soundHitFinish;
+        e.getEntityPlayer().getEntityWorld().playSound(e.getEntityPlayer(), living.posX, living.posY, living.posZ, sound, SoundCategory.PLAYERS, 1f, 1f);
     }
 
     @SubscribeEvent
