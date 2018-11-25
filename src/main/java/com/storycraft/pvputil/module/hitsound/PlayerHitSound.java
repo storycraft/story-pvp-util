@@ -36,14 +36,6 @@ public class PlayerHitSound implements IModule {
 
     @Override
     public void preInitialize() {
-        this.soundHitNormalLoc = new ResourceLocation("storycraft", "hitnormal");
-        this.soundHitClapLoc = new ResourceLocation("storycraft", "hitclap");
-        this.soundHitFinishLoc = new ResourceLocation("storycraft", "hitfinish");
-
-        this.soundHitNormal = new SoundEvent(soundHitNormalLoc);
-        this.soundHitClap = new SoundEvent(soundHitClapLoc);
-        this.soundHitFinish = new SoundEvent(soundHitFinishLoc);
-        
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -57,6 +49,18 @@ public class PlayerHitSound implements IModule {
 
     @SubscribeEvent
     public void registerSound(RegistryEvent.Register<SoundEvent> e) {
+        this.soundHitNormalLoc = new ResourceLocation("storycraft", "hitnormal");
+        this.soundHitClapLoc = new ResourceLocation("storycraft", "hitclap");
+        this.soundHitFinishLoc = new ResourceLocation("storycraft", "hitfinish");
+
+        this.soundHitNormal = new SoundEvent(soundHitNormalLoc);
+        this.soundHitClap = new SoundEvent(soundHitClapLoc);
+        this.soundHitFinish = new SoundEvent(soundHitFinishLoc);
+
+        soundHitNormal.setRegistryName("hitsound.normal");
+        soundHitClap.setRegistryName("hitsound.clap");
+        soundHitFinish.setRegistryName("hitsound.finish");
+
         e.getRegistry().registerAll(soundHitNormal, soundHitClap, soundHitFinish);
     }
 
