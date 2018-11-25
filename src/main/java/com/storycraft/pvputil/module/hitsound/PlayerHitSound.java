@@ -16,6 +16,9 @@ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class PlayerHitSound implements IModule {
 
@@ -34,6 +37,9 @@ public class PlayerHitSound implements IModule {
     private SoundEvent soundHitClap;
     private SoundEvent soundHitFinish;
 
+    private boolean sprint;
+    private float lastSprint;
+
     @Override
     public void preInitialize() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -45,13 +51,16 @@ public class PlayerHitSound implements IModule {
 
         this.soundEnabled = isModEnabled();
         this.newDisabled = isNewHitsoundDisabled();
+
+        this.lastSprint = 0;
+        this.sprint = false;
     }
 
     @SubscribeEvent
     public void registerSound(RegistryEvent.Register<SoundEvent> e) {
-        this.soundHitNormalLoc = new ResourceLocation("storycraft", "hitnormal");
-        this.soundHitClapLoc = new ResourceLocation("storycraft", "hitclap");
-        this.soundHitFinishLoc = new ResourceLocation("storycraft", "hitfinish");
+        this.soundHitNormalLoc = new ResourceLocation(PvpUtil.getModMetadata().modId, "hitsound.normal");
+        this.soundHitClapLoc = new ResourceLocation(PvpUtil.getModMetadata().modId, "hitsound.clap");
+        this.soundHitFinishLoc = new ResourceLocation(PvpUtil.getModMetadata().modId, "hitsound.finish");
 
         this.soundHitNormal = new SoundEvent(soundHitNormalLoc);
         this.soundHitClap = new SoundEvent(soundHitClapLoc);
@@ -60,8 +69,19 @@ public class PlayerHitSound implements IModule {
         soundHitNormal.setRegistryName("hitsound.normal");
         soundHitClap.setRegistryName("hitsound.clap");
         soundHitFinish.setRegistryName("hitsound.finish");
+    }
 
-        e.getRegistry().registerAll(soundHitNormal, soundHitClap, soundHitFinish);
+    @SubscribeEvent
+    public void capturePlayerSprint(PlayerTickEvent e) {
+        if (e.phase == Phase.END && e.player.isUser()) {
+            if (sprint != e.player.isSprinting()) {
+                if (sprint) {
+                    lastSprint = System.currentTimeMillis();
+                }
+
+                sprint = e.player.isSprinting();
+            }
+        }
     }
 
     @SubscribeEvent
@@ -74,13 +94,13 @@ public class PlayerHitSound implements IModule {
         EntityPlayer attacker = e.getEntityPlayer();
 
         float f2 = attacker.getCooledAttackStrength(0.5F);
-        boolean wtap = f2 > 0.9F;
+        boolean power = f2 > 0.9F;
 
-        boolean crit = wtap && attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
+        boolean crit = power && attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
 
         SoundEvent sound = soundHitNormal;
 
-        if (attacker.isSprinting() && wtap) { //W tapping
+        if (attacker.isSprinting() && System.currentTimeMillis() - lastSprint < 1000 && power) { //W tap
             sound = soundHitClap;
         }
         

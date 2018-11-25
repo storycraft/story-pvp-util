@@ -1,0 +1,35 @@
+{
+    "hitsound.normal": {
+	    "replace": true,
+        "category": "player",
+	    "sounds": [
+            {
+            "name": "story-pvp-util:entity/player/attack/hitnormal",
+            "stream": false,
+            "pitch": 1.0
+            }
+		]
+    },
+    "hitsound.clap": {
+        "replace": true,
+        "category": "player",
+	    "sounds": [
+            {
+            "name": "story-pvp-util:entity/player/attack/hitclap",
+            "stream": false,
+            "pitch": 1.0
+            }
+		]
+    },
+	"hitsound.finish": {
+	    "replace": true,
+        "category": "player",
+	    "sounds": [
+            {
+            "name": "story-pvp-util:entity/player/attack/hitfinish",
+            "stream": false,
+            "pitch": 1.0
+            }
+		]
+	}
+}
