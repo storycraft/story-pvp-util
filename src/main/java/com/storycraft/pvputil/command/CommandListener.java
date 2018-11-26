@@ -16,12 +16,12 @@ public class CommandListener {
 
     @SubscribeEvent
     public void onCommand(ServerChatEvent e){
-        if (e.isCanceled() || !e.isCancelable() || e.getMessage() == null || !e.getMessage().startsWith(CommandManager.COMMAND_PREFIX))
+        if (e.isCanceled() || !e.isCancelable() || e.message == null || !e.message.startsWith(CommandManager.COMMAND_PREFIX))
             return;
 
         e.setCanceled(true);
 
-        String msg = e.getMessage().substring(CommandManager.COMMAND_PREFIX.length());
+        String msg = e.message.substring(CommandManager.COMMAND_PREFIX.length());
         //PREFIX 제거 후 공백으로 나눔
         int spaceIndex = msg.indexOf(" ");
         String commandStr = msg.substring(CommandManager.COMMAND_PREFIX.length(), spaceIndex != -1 ? spaceIndex - 1 : msg.length());
@@ -34,6 +34,6 @@ public class CommandListener {
 
         String[] args = msg.substring(commandStr.length()).split(" ");
 
-        command.onCommand(e.getPlayer(), args);
+        command.onCommand(e.player, args);
     }
 }

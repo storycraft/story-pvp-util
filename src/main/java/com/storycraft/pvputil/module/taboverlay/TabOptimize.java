@@ -81,9 +81,9 @@ public class TabOptimize implements IModule {
                 if (ping > 0 && ping < 10000) {
                     GL11.glPushMatrix();
                     GL11.glScalef(0.5f, 0.5f, 0.5f);
-                    int x = p_175245_2_ + p_175245_1_ - (minecraft.fontRenderer.getStringWidth("" + ping + "") >> 1) - 2;
-                    int y = p_175245_3_ + (minecraft.fontRenderer.FONT_HEIGHT >> 2);
-                    minecraft.fontRenderer.drawString("" + ping + "", (float)(2 * x), (float)(2 * y), colour, true);
+                    int x = p_175245_2_ + p_175245_1_ - (minecraft.fontRendererObj.getStringWidth("" + ping + "") >> 1) - 2;
+                    int y = p_175245_3_ + (minecraft.fontRendererObj.FONT_HEIGHT >> 2);
+                    minecraft.fontRendererObj.drawString("" + ping + "", (float)(2 * x), (float)(2 * y), colour, true);
                     GL11.glScalef(2.0f, 2.0f, 2.0f);
                     GL11.glPopMatrix();
                 }

@@ -6,13 +6,10 @@ import com.storycraft.pvputil.module.IModule;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -28,15 +25,10 @@ public class PlayerHitSound implements IModule {
     private PvpUtil mod;
 
     private boolean soundEnabled;
-    private boolean newDisabled;
 
     private ResourceLocation soundHitNormalLoc;
     private ResourceLocation soundHitClapLoc;
     private ResourceLocation soundHitFinishLoc;
-
-    private SoundEvent soundHitNormal;
-    private SoundEvent soundHitClap;
-    private SoundEvent soundHitFinish;
 
     private boolean sprint;
     private long sprintStart;
@@ -51,25 +43,13 @@ public class PlayerHitSound implements IModule {
         this.mod = mod;
 
         this.soundEnabled = isModEnabled();
-        this.newDisabled = isNewHitsoundDisabled();
 
-        this.sprintStart = 0;
-        this.sprint = false;
-    }
-
-    @SubscribeEvent
-    public void registerSound(RegistryEvent.Register<SoundEvent> e) {
         this.soundHitNormalLoc = new ResourceLocation(PvpUtil.getModMetadata().modId, "hitsound.normal");
         this.soundHitClapLoc = new ResourceLocation(PvpUtil.getModMetadata().modId, "hitsound.clap");
         this.soundHitFinishLoc = new ResourceLocation(PvpUtil.getModMetadata().modId, "hitsound.finish");
 
-        this.soundHitNormal = new SoundEvent(soundHitNormalLoc);
-        this.soundHitClap = new SoundEvent(soundHitClapLoc);
-        this.soundHitFinish = new SoundEvent(soundHitFinishLoc);
-
-        soundHitNormal.setRegistryName("hitsound.normal");
-        soundHitClap.setRegistryName("hitsound.clap");
-        soundHitFinish.setRegistryName("hitsound.finish");
+        this.sprintStart = 0;
+        this.sprint = false;
     }
 
     @SubscribeEvent
@@ -87,41 +67,31 @@ public class PlayerHitSound implements IModule {
 
     @SubscribeEvent
     public void onLeftInteract(AttackEntityEvent e){
-        if (e.getEntityPlayer() == null || !e.getEntityPlayer().isUser() || !soundEnabled){
+        if (e.entityPlayer == null || !e.entityPlayer.isUser() || !soundEnabled){
             return;
         }
 
-        Entity target = e.getTarget();
-        EntityPlayer attacker = e.getEntityPlayer();
+        Entity target = e.target;
+        EntityPlayer attacker = e.entityPlayer;
 
-        boolean crit = attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
+        boolean crit = attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(Potion.blindness) && !attacker.isRiding() && !attacker.isSprinting();
 
         World world = attacker.getEntityWorld();
 
-        world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
+        world.playSoundAtEntity(attacker, soundHitNormalLoc.toString(), 1f, 1f);
 
         if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 300) { //W tap
-            world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
+            world.playSoundAtEntity(attacker, soundHitClapLoc.toString(), 1f, 1f);
         }
     
         if (crit) { //Crit
-            world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitFinish, SoundCategory.PLAYERS, 1f, 1f);
+            world.playSoundAtEntity(attacker, soundHitFinishLoc.toString(), 1f, 1f);
         }
-    }
-
-    @SubscribeEvent
-    public void onNewHitSoundPlay(PlaySoundAtEntityEvent e) {
-        if (!this.newDisabled || !e.getSound().getRegistryName().getResourcePath().startsWith("entity.player.attack")) {
-            return;
-        }
-
-        e.setCanceled(true);
     }
 
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.PostConfigChangedEvent e) {
         this.soundEnabled = isModEnabled();
-        this.newDisabled = isNewHitsoundDisabled();
     }
 
     public boolean isModEnabled() {
@@ -129,13 +99,6 @@ public class PlayerHitSound implements IModule {
             getModuleConfigEntry().set("sound_when_click_entity", true);
 
         return getModuleConfigEntry().get("sound_when_click_entity").getAsBoolean();
-    }
-
-    public boolean isNewHitsoundDisabled() {
-        if (!getModuleConfigEntry().contains("disable_1_9_hitsound"))
-            getModuleConfigEntry().set("disable_1_9_hitsound", false);
-
-        return getModuleConfigEntry().get("disable_1_9_hitsound").getAsBoolean();
     }
 
     public JsonConfigEntry getModuleConfigEntry(){

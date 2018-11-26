@@ -100,13 +100,6 @@ public class DynamicBoundingBox implements IModule {
         return getModuleConfigEntry().get("boundingbox_not_living").getAsBoolean();
     }
 
-    public boolean isPartDrawingEnabled() {
-		if (!getModuleConfigEntry().contains("boundingbox_render_part"))
-            getModuleConfigEntry().set("boundingbox_render_part", true);
-
-        return getModuleConfigEntry().get("boundingbox_render_part").getAsBoolean();
-	}
-
     public JsonConfigEntry getModuleConfigEntry(){
         if (!mod.getDefaultConfig().contains(OPTION_CATEGORY)) {
             mod.getDefaultConfig().set(OPTION_CATEGORY, new JsonConfigEntry());

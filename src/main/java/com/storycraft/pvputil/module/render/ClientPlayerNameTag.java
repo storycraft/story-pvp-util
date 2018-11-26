@@ -6,11 +6,10 @@ import com.storycraft.pvputil.module.IModule;
 import com.storycraft.pvputil.util.reflect.Reflect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -26,10 +25,21 @@ public class ClientPlayerNameTag implements IModule {
 
     public static final String OPTION_CATEGORY = "render";
 
-    private static Reflect.WrappedMethod<Void, RenderPlayer> renderEntityName;
+    private static Reflect.WrappedMethod<Void, RenderPlayer> renderOffsetLivingLabel;
+
+    private static Reflect.WrappedField<Timer, Minecraft> timer;
+
+    private static Reflect.WrappedField<Double, RenderManager> renderPosX;
+    private static Reflect.WrappedField<Double, RenderManager> renderPosY;
+    private static Reflect.WrappedField<Double, RenderManager> renderPosZ;
 
     static {
-        renderEntityName = Reflect.getMethod(RenderPlayer.class, "renderEntityName", "func_188296_a", AbstractClientPlayer.class, double.class, double.class, double.class, String.class, double.class);
+        renderOffsetLivingLabel = Reflect.getMethod(RenderPlayer.class, "renderOffsetLivingLabel", "func_177069_a", AbstractClientPlayer.class, double.class, double.class, double.class, String.class, float.class, double.class);
+        timer = Reflect.getField(Minecraft.class, "timer", "field_71428_T");
+
+        renderPosX = Reflect.getField(RenderManager.class, "renderPosX", "field_78725_b");
+        renderPosY = Reflect.getField(RenderManager.class, "renderPosY", "field_78726_c");
+        renderPosZ = Reflect.getField(RenderManager.class, "renderPosZ", "field_78723_d");
     }
 
     private PvpUtil mod;
@@ -58,17 +68,52 @@ public class ClientPlayerNameTag implements IModule {
 
     @SubscribeEvent
     public void onPostRender(RenderPlayerEvent.Post e){
-        if (e.getEntityPlayer().isUser() && modEnabled && minecraft.gameSettings.thirdPersonView != 0) {
-            EntityPlayer entity = e.getEntityPlayer();
+        if (modEnabled && minecraft.gameSettings.thirdPersonView != 0 && e.entityPlayer.isUser()) {
+            EntityPlayer entity = e.entityPlayer;
 
-            double d0 = entity.getDistanceSq(e.getRenderer().getRenderManager().renderViewEntity);
-            float f = entity.isSneaking() ? RenderPlayer.NAME_TAG_RANGE_SNEAK : RenderPlayer.NAME_TAG_RANGE;
+            double d0 = e.entityPlayer.lastTickPosX + (e.entityPlayer.posX - e.entityPlayer.lastTickPosX) * e.partialRenderTick;
+            double d1 = e.entityPlayer.lastTickPosY + (e.entityPlayer.posY - e.entityPlayer.lastTickPosY) * e.partialRenderTick;
+            double d2 = e.entityPlayer.lastTickPosZ + (e.entityPlayer.posZ - e.entityPlayer.lastTickPosZ) * e.partialRenderTick;
 
-            if (d0 < (double)(f * f))
-            {
-                String s = entity.getDisplayName().getFormattedText();
-                GlStateManager.alphaFunc(516, 0.1F);
-                renderEntityName.invoke(e.getRenderer(), ((EntityPlayerSP) entity), e.getX(), e.getY(), e.getZ(), s, d0);
+            double x = d0 - renderPosX.get(e.renderer.getRenderManager());
+            double y = d1 - renderPosY.get(e.renderer.getRenderManager());
+            double z = d2 - renderPosZ.get(e.renderer.getRenderManager());
+
+            String s = entity.getDisplayName().getFormattedText();
+            GlStateManager.alphaFunc(516, 0.1F);
+
+            if (entity.isSneaking()) {
+                FontRenderer fontrenderer = e.renderer.getFontRendererFromRenderManager();
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(x, y + entity.height + 0.5F - (entity.isChild() ? entity.height / 2.0F : 0.0F), z);
+                GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(-e.renderer.getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(e.renderer.getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
+                GlStateManager.scale(-0.02666667F, -0.02666667F, 0.02666667F);
+                GlStateManager.translate(0.0F, 9.374999F, 0.0F);
+                GlStateManager.disableLighting();
+                GlStateManager.depthMask(false);
+                GlStateManager.enableBlend();
+                GlStateManager.disableTexture2D();
+                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                int i = fontrenderer.getStringWidth(s) / 2;
+                Tessellator tessellator = Tessellator.getInstance();
+                WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+                worldrenderer.pos((double) (-i - 1), -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+                worldrenderer.pos((double) (-i - 1), 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+                worldrenderer.pos((double) (i + 1), 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+                worldrenderer.pos((double) (i + 1), -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+                tessellator.draw();
+                GlStateManager.enableTexture2D();
+                GlStateManager.depthMask(true);
+                fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, 553648127);
+                GlStateManager.enableLighting();
+                GlStateManager.disableBlend();
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GlStateManager.popMatrix();
+            } else {
+                renderOffsetLivingLabel.invoke(e.renderer, entity, x, y - (entity.isChild() ? (double) (entity.height / 2.0F) : 0.0D), z, s, 0.02666667F, 0);
             }
         }
     }

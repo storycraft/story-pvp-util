@@ -41,7 +41,7 @@ public class Reflect {
     }
 
     public static <T, C>WrappedMethod<T, C> getMethod(Class<C> c, String methodName, String methodObfName, Class... params) {
-        Method method = ReflectionHelper.findMethod(c, methodName, methodObfName, params);
+        Method method = ReflectionHelper.findMethod(c, null, new String[] {methodName, methodObfName}, params);
 
         return new WrappedMethod<>(method);
     }

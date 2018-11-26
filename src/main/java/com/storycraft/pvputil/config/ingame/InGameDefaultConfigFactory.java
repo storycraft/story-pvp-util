@@ -20,26 +20,26 @@ public class InGameDefaultConfigFactory implements IModGuiFactory {
     }
 
     @Override
+    public Class<? extends GuiScreen> mainConfigGuiClass() {
+        return InGameDefaultConfigGui.class;
+    }
+
+    @Override
     public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
+        return null;
+    }
+
+    @Override
+    public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
         return null;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent e) {
-        if (!PvpUtil.getModMetadata().modId.equalsIgnoreCase(e.getModID()) || e.getResult() == Event.Result.DENY || e.isCanceled())
+        if (!PvpUtil.getModMetadata().modId.equalsIgnoreCase(e.modID) || e.getResult() == Event.Result.DENY || e.isCanceled())
             return;
 
         PvpUtil.getDefaultGlobalConfig().updateFromForgeConfig();
         PvpUtil.getInstance().getConfigManager().saveAll();
-    }
-
-    @Override
-    public boolean hasConfigGui() {
-        return true;
-    }
-
-    @Override
-    public GuiScreen createConfigGui(GuiScreen parentScreen) {
-        return new InGameDefaultConfigGui(parentScreen);
     }
 }

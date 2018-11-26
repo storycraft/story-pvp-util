@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -72,8 +72,8 @@ public class ChatOptimize implements IModule {
 
     @SubscribeEvent
     public void guiChat(GuiOpenEvent e) {
-        if (e.getGui() instanceof GuiChat) {
-            e.setGui(new OptimizedChatGui(defaultInputFieldText.get((GuiChat) e.getGui())));
+        if (e.gui instanceof GuiChat) {
+            e.gui = new OptimizedChatGui(defaultInputFieldText.get((GuiChat) e.gui));
         }
     }
 
@@ -128,103 +128,98 @@ public class ChatOptimize implements IModule {
         }
 
         @Override
-        public void drawChat(int updateCounter)
+        public void drawChat(int p_146230_1_)
         {
-            if (ChatOptimize.this.minecraft.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN)
+            if (minecraft.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN)
             {
                 int i = this.getLineCount();
-                List<ChatLine> drawnChatLines = field_146253_i.get(this);
-                int j = drawnChatLines.size();
-
                 int scrollPos = ChatOptimize.scrollPos.get(this);
                 boolean isScrolled = ChatOptimize.isScrolled.get(this);
-
+                boolean flag = false;
+                int j = 0;
+                int k = field_146253_i.get(this).size();
                 float f;
-
                 if (isAlphaFakeDisabled){
                     f = minecraft.gameSettings.chatOpacity;
                 }
                 else {
                     f = minecraft.gameSettings.chatOpacity * 0.9F + 0.1F;
                 }
-    
-                if (j > 0)
+
+                if (k > 0)
                 {
-                    boolean flag = false;
-    
                     if (this.getChatOpen())
                     {
                         flag = true;
                     }
-    
+
                     float f1 = this.getChatScale();
-                    int k = MathHelper.ceil((float)this.getChatWidth() / f1);
+                    int l = MathHelper.ceiling_float_int((float)this.getChatWidth() / f1);
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate(2.0F, 8.0F, 0.0F);
+                    GlStateManager.translate(2.0F, 20.0F, 0.0F);
                     GlStateManager.scale(f1, f1, 1.0F);
-                    int l = 0;
-    
-                    for (int i1 = 0; i1 + scrollPos < drawnChatLines.size() && i1 < i; ++i1)
+
+                    for (int i1 = 0; i1 + scrollPos < k && i1 < i; ++i1)
                     {
-                        ChatLine chatline = drawnChatLines.get(i1 + scrollPos);
-    
+                        ChatLine chatline = field_146253_i.get(this).get(i1 + scrollPos);
+
                         if (chatline != null)
                         {
-                            int j1 = updateCounter - chatline.getUpdatedCounter();
-    
+                            int j1 = p_146230_1_ - chatline.getUpdatedCounter();
+
                             if (j1 < 200 || flag)
                             {
                                 double d0 = (double)j1 / 200.0D;
                                 d0 = 1.0D - d0;
                                 d0 = d0 * 10.0D;
-                                d0 = MathHelper.clamp(d0, 0.0D, 1.0D);
+                                d0 = MathHelper.clamp_double(d0, 0.0D, 1.0D);
                                 d0 = d0 * d0;
                                 int l1 = (int)(255.0D * d0);
-    
+
                                 if (flag)
                                 {
                                     l1 = 255;
                                 }
-    
+
                                 l1 = (int)((float)l1 * f);
-                                ++l;
-    
+                                ++j;
+
                                 if (l1 > 3)
                                 {
                                     int i2 = 0;
                                     int j2 = -i1 * 9;
 
                                     if (isBackgroundEnabled)
-                                        drawRect(-2, j2 - 9, 0 + k + 4, j2, l1 / 2 << 24);
-
+                                        drawRect(i2, j2 - 9, i2 + l + 4, j2, l1 / 2 << 24);
                                     String s = chatline.getChatComponent().getFormattedText();
                                     GlStateManager.enableBlend();
-                                    ChatOptimize.this.minecraft.fontRenderer.drawString(s, 0.0F, (float)(j2 - 8), 16777215 + (l1 << 24), isShadowEnabled);
+                                    minecraft.fontRendererObj.drawString(s, (float)i2, (float)(j2 - 8), 16777215 + (l1 << 24), isShadowEnabled);
                                     GlStateManager.disableAlpha();
                                     GlStateManager.disableBlend();
                                 }
                             }
                         }
                     }
-    
+
                     if (flag)
                     {
-                        int k2 = ChatOptimize.this.minecraft.fontRenderer.FONT_HEIGHT;
+                        int k2 = minecraft.fontRendererObj.FONT_HEIGHT;
                         GlStateManager.translate(-3.0F, 0.0F, 0.0F);
-                        int l2 = j * k2 + j;
-                        int i3 = l * k2 + l;
-                        int j3 = scrollPos * i3 / j;
+                        int l2 = k * k2 + k;
+                        int i3 = j * k2 + j;
+                        int j3 = scrollPos * i3 / k;
                         int k1 = i3 * i3 / l2;
-    
+
                         if (l2 != i3)
                         {
                             int k3 = j3 > 0 ? 170 : 96;
                             int l3 = isScrolled ? 13382451 : 3355562;
+
                             drawRect(0, -j3, 2, -j3 - k1, l3 + (k3 << 24));
                             drawRect(2, -j3, 1, -j3 - k1, 13421772 + (k3 << 24));
                         }
                     }
-    
+
                     GlStateManager.popMatrix();
                 }
             }

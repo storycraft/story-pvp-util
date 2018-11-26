@@ -10,10 +10,10 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -178,15 +178,15 @@ public class AsyncScreenshot implements IModule {
 
                     ImageIO.write(bufferedimage, "png", screenshotFile);
 
-                    ITextComponent textComponent = new TextComponentString(screenshotFile.getName());
-                    textComponent.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, screenshotFile.getAbsoluteFile().getAbsolutePath()));
-                    textComponent.getStyle().setUnderlined(Boolean.valueOf(true));
+                    IChatComponent ichatcomponent = new ChatComponentText(screenshotFile.getName());
+                    ichatcomponent.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, screenshotFile.getAbsoluteFile().getAbsolutePath()));
+                    ichatcomponent.getChatStyle().setUnderlined(Boolean.valueOf(true));
 
-                    minecraft.ingameGUI.getChatGUI().printChatMessage(new TextComponentTranslation("screenshot.success", new Object[]{textComponent}));
+                    minecraft.ingameGUI.getChatGUI().printChatMessage(new ChatComponentTranslation("screenshot.success", new Object[]{ichatcomponent}));
                 }
                 catch (Exception e) {
                     mod.getLogger().warning("Couldn't save screenshot " + e.getLocalizedMessage());
-                    minecraft.ingameGUI.getChatGUI().printChatMessage(new TextComponentTranslation("screenshot.failure", new Object[]{e.getLocalizedMessage()}));
+                    minecraft.ingameGUI.getChatGUI().printChatMessage(new ChatComponentTranslation("screenshot.failure", new Object[]{e.getLocalizedMessage()}));
                 }
 
                 return null;
