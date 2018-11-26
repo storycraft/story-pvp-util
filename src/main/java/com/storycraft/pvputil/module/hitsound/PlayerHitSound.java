@@ -78,14 +78,14 @@ public class PlayerHitSound implements IModule {
 
         World world = attacker.getEntityWorld();
 
-        world.playSoundAtEntity(attacker, soundHitNormalLoc.toString(), 1f, 1f);
+        world.playSound(target.posX, target.posY, target.posZ, soundHitNormalLoc.toString(), 1f, 1f, false);
 
         if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 300) { //W tap
-            world.playSoundAtEntity(attacker, soundHitClapLoc.toString(), 1f, 1f);
+            world.playSound(target.posX, target.posY, target.posZ, soundHitClapLoc.toString(), 1f, 1f, false);
         }
     
         if (crit) { //Crit
-            world.playSoundAtEntity(attacker, soundHitFinishLoc.toString(), 1f, 1f);
+            world.playSound(target.posX, target.posY, target.posZ, soundHitFinishLoc.toString(), 1f, 1f, false);
         }
     }
 
