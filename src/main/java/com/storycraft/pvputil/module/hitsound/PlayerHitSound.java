@@ -39,7 +39,7 @@ public class PlayerHitSound implements IModule {
     private SoundEvent soundHitFinish;
 
     private boolean sprint;
-    private float lastSprint;
+    private long sprintStart;
 
     @Override
     public void preInitialize() {
@@ -53,7 +53,7 @@ public class PlayerHitSound implements IModule {
         this.soundEnabled = isModEnabled();
         this.newDisabled = isNewHitsoundDisabled();
 
-        this.lastSprint = 0;
+        this.sprintStart = 0;
         this.sprint = false;
     }
 
@@ -76,11 +76,11 @@ public class PlayerHitSound implements IModule {
     public void capturePlayerSprint(PlayerTickEvent e) {
         if (e.player.isUser()) {
             if (sprint != e.player.isSprinting()) {
-                if (!sprint) {
-                    lastSprint = System.currentTimeMillis();
-                }
-
                 sprint = e.player.isSprinting();
+
+                if (sprint) {
+                    sprintStart = System.currentTimeMillis();
+                }
             }
         }
     }
@@ -104,7 +104,7 @@ public class PlayerHitSound implements IModule {
         world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
 
         if (power) {
-            if (attacker.isSprinting() && (System.currentTimeMillis() - lastSprint) < 1000) { //W tap
+            if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 1000) { //W tap
                 world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
             }
         
