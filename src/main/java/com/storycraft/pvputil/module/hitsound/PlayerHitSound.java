@@ -94,23 +94,18 @@ public class PlayerHitSound implements IModule {
         Entity target = e.getTarget();
         EntityPlayer attacker = e.getEntityPlayer();
 
-        float f2 = attacker.getCooledAttackStrength(0.5F);
-        boolean power = f2 > 0.9F;
-
         boolean crit = attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
 
         World world = attacker.getEntityWorld();
 
         world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
 
-        if (power) {
-            if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 1000) { //W tap
-                world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
-            }
-        
-            if (crit) { //Crit
-                world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitFinish, SoundCategory.PLAYERS, 1f, 1f);
-            }
+        if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 300) { //W tap
+            world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
+        }
+    
+        if (crit) { //Crit
+            world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitFinish, SoundCategory.PLAYERS, 1f, 1f);
         }
     }
 
