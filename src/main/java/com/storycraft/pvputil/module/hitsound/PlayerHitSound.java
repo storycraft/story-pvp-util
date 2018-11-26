@@ -104,7 +104,7 @@ public class PlayerHitSound implements IModule {
         world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
 
         if (power) {
-            if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 200) { //W tap
+            if (attacker.isSprinting() && (System.currentTimeMillis() - sprintStart) <= 300) { //W tap
                 world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
             }
         
