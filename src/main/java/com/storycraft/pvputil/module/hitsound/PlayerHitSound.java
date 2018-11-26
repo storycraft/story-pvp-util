@@ -73,9 +73,9 @@ public class PlayerHitSound implements IModule {
 
     @SubscribeEvent
     public void capturePlayerSprint(PlayerTickEvent e) {
-        if (e.phase == Phase.END && e.player.isUser()) {
+        if (e.player.isUser()) {
             if (sprint != e.player.isSprinting()) {
-                if (sprint) {
+                if (!sprint) {
                     lastSprint = System.currentTimeMillis();
                 }
 
@@ -96,16 +96,18 @@ public class PlayerHitSound implements IModule {
         float f2 = attacker.getCooledAttackStrength(0.5F);
         boolean power = f2 > 0.9F;
 
-        boolean crit = power && attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
+        boolean crit = attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
 
         SoundEvent sound = soundHitNormal;
 
-        if (attacker.isSprinting() && System.currentTimeMillis() - lastSprint < 1000 && power) { //W tap
-            sound = soundHitClap;
-        }
+        if (power) {
+            if (attacker.isSprinting() && (System.currentTimeMillis() - lastSprint) < 1000) { //W tap
+                sound = soundHitClap;
+            }
         
-        if (crit) { //Crit
-            sound = soundHitFinish;
+            if (crit) { //Crit
+                sound = soundHitFinish;
+            }
         }
 
         attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, sound, SoundCategory.PLAYERS, 1f, 1f);
