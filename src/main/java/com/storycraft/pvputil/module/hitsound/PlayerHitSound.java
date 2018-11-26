@@ -98,19 +98,17 @@ public class PlayerHitSound implements IModule {
 
         boolean crit = attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
 
-        SoundEvent sound = soundHitNormal;
-
         if (power) {
             if (attacker.isSprinting() && (System.currentTimeMillis() - lastSprint) < 1000) { //W tap
-                sound = soundHitClap;
+                attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
             }
         
             if (crit) { //Crit
-                sound = soundHitFinish;
+                attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, soundHitFinish, SoundCategory.PLAYERS, 1f, 1f);
             }
         }
 
-        attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, sound, SoundCategory.PLAYERS, 1f, 1f);
+        attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
     }
 
     @SubscribeEvent
