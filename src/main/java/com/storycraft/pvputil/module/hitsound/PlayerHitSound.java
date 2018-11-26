@@ -10,6 +10,7 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
@@ -98,17 +99,19 @@ public class PlayerHitSound implements IModule {
 
         boolean crit = attacker.fallDistance > 0.0F && !attacker.onGround && !attacker.isOnLadder() && !attacker.isInWater() && !attacker.isPotionActive(MobEffects.BLINDNESS) && !attacker.isRiding() && !attacker.isSprinting();
 
+        World world = attacker.getEntityWorld();
+
+        world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
+
         if (power) {
             if (attacker.isSprinting() && (System.currentTimeMillis() - lastSprint) < 1000) { //W tap
-                attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
+                world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitClap, SoundCategory.PLAYERS, 1f, 1f);
             }
         
             if (crit) { //Crit
-                attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, soundHitFinish, SoundCategory.PLAYERS, 1f, 1f);
+                world.playSound(attacker, target.posX, target.posY, target.posZ, soundHitFinish, SoundCategory.PLAYERS, 1f, 1f);
             }
         }
-
-        attacker.getEntityWorld().playSound(attacker, target.posX, target.posY, target.posZ, soundHitNormal, SoundCategory.PLAYERS, 1f, 1f);
     }
 
     @SubscribeEvent
