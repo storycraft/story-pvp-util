@@ -8,6 +8,7 @@ import com.storycraft.pvputil.config.json.JsonConfigEntry;
 import com.storycraft.pvputil.module.IModule;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -182,12 +183,12 @@ public class ComboCounter implements IModule {
 
         if (drawScaleOverlay) {
             GlStateManager.color(1, 1, 1, (1 - scaleOverlayProgress) * 0.75f);
-            minecraft.ingameGUI.drawTexturedModalRect(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)), (int) (40 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)));
+            Gui.drawModalRectWithCustomSizedTexture(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)), (int) (40 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)), 40, 30);
         }
 
         GlStateManager.color(1, 1, 1);
 
-        minecraft.ingameGUI.drawTexturedModalRect(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * (overlayProgress * POPOUT_SMALL_SCALE)), (int) (40 * (overlayProgress * POPOUT_SMALL_SCALE)));
+        Gui.drawModalRectWithCustomSizedTexture(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * (overlayProgress * POPOUT_SMALL_SCALE)), (int) (40 * (overlayProgress * POPOUT_SMALL_SCALE)), 40, 30);
     }
 
     protected ResourceLocation[] getRequiredTexture(int combo) {
