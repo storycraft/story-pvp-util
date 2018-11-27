@@ -31,5 +31,16 @@
             "pitch": 1.0
             }
 		]
-	}
+    },
+    "combo.break": {
+	    "replace": true,
+        "category": "player",
+	    "sounds": [
+            {
+            "name": "story-pvp-util:combo/combobreak",
+            "stream": false,
+            "pitch": 1.0
+            }
+		]
+    }
 }

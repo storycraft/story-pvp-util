@@ -5,6 +5,7 @@ import com.storycraft.pvputil.module.chat.ChatOptimize;
 import com.storycraft.pvputil.module.fullscreen.FullscreenCursorConfine;
 import com.storycraft.pvputil.module.hitsound.PlayerHitSound;
 import com.storycraft.pvputil.module.input.Rawinput;
+import com.storycraft.pvputil.module.overlay.ComboCounter;
 import com.storycraft.pvputil.module.render.ClientPlayerNameTag;
 import com.storycraft.pvputil.module.render.DynamicBoundingBox;
 import com.storycraft.pvputil.module.render.LabelBoxRenderToggle;
@@ -34,6 +35,7 @@ public class ModuleManager {
         addModule("async_screenshot", new AsyncScreenshot());
 
         addModule("hitsound", new PlayerHitSound());
+        addModule("combo_counter", new ComboCounter());
 
         addModule("session_refresh", new SessionRefresh());
 
