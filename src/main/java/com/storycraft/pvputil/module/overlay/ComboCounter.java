@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -29,10 +30,13 @@ public class ComboCounter implements IModule {
     private static final int LEFT_MARGIN = 10;
     private static final int BOTTOM_MARGIN = 10;
 
-    private static final float POPOUT_SCALE = 1.6f;
-    private static final float POPOUT_SMALL_SCALE = 1.1f;
+    private static final float POPOUT_SCALE = .6f;
+    private static final float POPOUT_SMALL_SCALE = .1f;
 
     private static final float POPOUT_DURATION = 150f;
+
+    private static final int SPRITE_WIDTH = 30;
+    private static final int SPRITE_HEIGHT = 40;
 
     private PvpUtil mod;
     private Minecraft minecraft;
@@ -141,8 +145,6 @@ public class ComboCounter implements IModule {
     @SubscribeEvent
     public void onScreenDraw(RenderGameOverlayEvent.Post e) {
         if (e.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && enabled && currentCombo > 0) {
-            Minecraft minecraft = Minecraft.getMinecraft();
-
             ResourceLocation[] list = getRequiredTexture(currentCombo);
 
             ScaledResolution scaledresolution = new ScaledResolution(minecraft);
@@ -179,23 +181,43 @@ public class ComboCounter implements IModule {
     }
 
     private void drawComboText(int index, int screenWidth, int screenHeight, ResourceLocation resource, boolean drawScaleOverlay, float scaleOverlayProgress, float overlayProgress) {
+        GlStateManager.pushAttrib();
+        GlStateManager.pushMatrix();
+
+        GlStateManager.translate(LEFT_MARGIN + index * SPRITE_WIDTH, screenHeight - BOTTOM_MARGIN - SPRITE_HEIGHT, 0);
+
+        GlStateManager.pushAttrib();
+        GlStateManager.pushMatrix();
+
         minecraft.getTextureManager().bindTexture(resource);
 
         if (drawScaleOverlay) {
             GlStateManager.color(1, 1, 1, (1 - scaleOverlayProgress) * 0.75f);
-            Gui.drawModalRectWithCustomSizedTexture(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)), (int) (40 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)), 40, 30);
+
+            float scaleOverlayScale = 1 + POPOUT_SCALE - scaleOverlayProgress * POPOUT_SCALE;
+            GlStateManager.scale(scaleOverlayScale, scaleOverlayScale, 1);
+            Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT);
         }
+
+        GlStateManager.popAttrib();
+        GlStateManager.popMatrix();
 
         GlStateManager.color(1, 1, 1);
 
-        Gui.drawModalRectWithCustomSizedTexture(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * (overlayProgress * POPOUT_SMALL_SCALE)), (int) (40 * (overlayProgress * POPOUT_SMALL_SCALE)), 40, 30);
+        float overlayScale = 1 + POPOUT_SMALL_SCALE - scaleOverlayProgress * POPOUT_SMALL_SCALE;
+        GlStateManager.scale(overlayScale, overlayScale, 1);
+
+        Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT);
+
+        GlStateManager.popAttrib();
+        GlStateManager.popMatrix();
     }
 
     protected ResourceLocation[] getRequiredTexture(int combo) {
         int size = ((int) Math.log10(combo)) + 1;
         ResourceLocation[] list = new ResourceLocation[size];
 
-        for (int i = 0; i < size; i++) {
+        for (int i = size - 1; i >= 0; i--) {
             list[i] = numberTextureList.get(combo % 10);
             combo /= 10;
         }
