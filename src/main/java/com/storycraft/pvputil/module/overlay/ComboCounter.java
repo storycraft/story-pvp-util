@@ -23,6 +23,8 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 
 public class ComboCounter implements IModule {
@@ -43,8 +45,8 @@ public class ComboCounter implements IModule {
     private static final int SPRITE_WIDTH = 30;
     private static final int SPRITE_HEIGHT = 40;
 
-    private static final int SCREEN_SPRITE_WIDTH = 20;
-    private static final int SCREEN_SPRITE_HEIGHT = 27;
+    private static final int SCREEN_SPRITE_WIDTH = 15;
+    private static final int SCREEN_SPRITE_HEIGHT = 20;
 
     private PvpUtil mod;
     private Minecraft minecraft;
@@ -58,6 +60,8 @@ public class ComboCounter implements IModule {
     private long lastComboChange;
     private int lastCombo;
     private int currentCombo;
+
+    private float lastHP;
 
     private ResourceLocation soundComboBreak;
 
@@ -73,6 +77,7 @@ public class ComboCounter implements IModule {
         this.enabled = isModEnabled();
         this.soundEnabled = isSoundEnabled();
         this.currentCombo = 0;
+        this.lastHP = 0;
 
         this.soundComboBreak = new ResourceLocation(PvpUtil.getModMetadata().modId, "combo.break");
 
@@ -132,23 +137,27 @@ public class ComboCounter implements IModule {
     }
 
     @SubscribeEvent
-    public void onDamage(LivingHurtEvent e) {
-        if (e.entityLiving == null || !enabled) {
-            return;
-        }
+    public void onPlayerHealthChange(PlayerTickEvent e) {
+        if (e.player.isUser() && enabled && e.phase == Phase.END) {
+            if (lastHP != e.player.getHealth()) {
 
-        if (e.entityLiving instanceof EntityPlayer && ((EntityPlayer) e.entityLiving).isUser()) {
-            setCombo(0);
+                if (lastHP > e.player.getHealth()) {
+                    setCombo(0);
 
-            if (soundEnabled) {
-                e.entityLiving.getEntityWorld().playSound(e.entityLiving.posX, e.entityLiving.posY, e.entityLiving.posZ, soundComboBreak.toString(), 1f, 1f, false);
+                    if (soundEnabled) {
+                        e.player.getEntityWorld().playSound(e.player.posX, e.player.posY, e.player.posZ, soundComboBreak.toString(), 1f, 1f, false);
+                    }
+                }
+
+                lastHP = e.player.getHealth();
             }
         }
     }
+
     
     @SubscribeEvent
     public void onHit(AttackEntityEvent e) {
-        if (e.entityPlayer == null || !enabled || !(e.target instanceof EntityPlayer)) {
+        if (e.entityPlayer == null || !enabled || !e.entityPlayer.isUser()) {
             return;
         }
 
@@ -156,12 +165,7 @@ public class ComboCounter implements IModule {
             setCombo(0);
         }
 
-        if (e.entityPlayer.isUser())
-            setCombo(getCombo() + 1);
-        else if (e.target instanceof EntityPlayer && ((EntityPlayer) e.target).isUser() && soundEnabled && getCombo() > 25) {
-            setCombo(0);
-            e.target.getEntityWorld().playSound(e.target.posX, e.target.posY, e.target.posZ, soundComboBreak.toString(), 1f, 1f, false);
-        }
+        setCombo(getCombo() + 1);
     }
 
     @SubscribeEvent
