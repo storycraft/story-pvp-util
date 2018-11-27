@@ -171,7 +171,7 @@ public class ComboCounter implements IModule {
                     return;
                 }
 
-                alpha = (timeFromLastHit - IDLE_START) / COMBO_FADE;
+                alpha = 1 - (timeFromLastHit - IDLE_START) / COMBO_FADE;
             }
 
             ResourceLocation[] list = getRequiredTexture(currentCombo);
@@ -203,6 +203,8 @@ public class ComboCounter implements IModule {
             }
 
             drawComboText(i, width, height, numberXTexture, drawScaleOverlay, scaleOverlayProgress, overlayProgress, alpha);
+
+            GlStateManager.color(1, 1, 1); //restore to avoid hud fade
 
             GlStateManager.disableAlpha();
             GlStateManager.disableBlend();
