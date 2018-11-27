@@ -17,7 +17,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -35,8 +34,14 @@ public class ComboCounter implements IModule {
 
     private static final float POPOUT_DURATION = 150f;
 
+    private static final float IDLE_START = 5000;
+    private static final float COMBO_FADE = 500;
+
     private static final int SPRITE_WIDTH = 30;
     private static final int SPRITE_HEIGHT = 40;
+
+    private static final int SCREEN_SPRITE_WIDTH = 20;
+    private static final int SCREEN_SPRITE_HEIGHT = 27;
 
     private PvpUtil mod;
     private Minecraft minecraft;
@@ -145,6 +150,19 @@ public class ComboCounter implements IModule {
     @SubscribeEvent
     public void onScreenDraw(RenderGameOverlayEvent.Post e) {
         if (e.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && enabled && currentCombo > 0) {
+            long timeFromLastHit = (System.currentTimeMillis() - getLastComboChange());
+            boolean fade = timeFromLastHit >= IDLE_START;
+            
+            float alpha = 1;
+
+            if (fade) {
+                if (timeFromLastHit - COMBO_FADE >= IDLE_START) {
+                    return;
+                }
+
+                alpha = (timeFromLastHit - IDLE_START) / COMBO_FADE;
+            }
+
             ResourceLocation[] list = getRequiredTexture(currentCombo);
 
             ScaledResolution scaledresolution = new ScaledResolution(minecraft);
@@ -153,10 +171,10 @@ public class ComboCounter implements IModule {
 
             GlStateManager.enableAlpha();
             GlStateManager.enableBlend();
-
-            long timeFromLastHit = (System.currentTimeMillis() - getLastComboChange());
+            
             boolean drawScaleOverlay = timeFromLastHit <= POPOUT_DURATION;
             boolean overlayScale = timeFromLastHit >= 150 && (timeFromLastHit - 150) <= POPOUT_DURATION;
+
             float scaleOverlayProgress = 0;
             float overlayProgress = 1;
 
@@ -170,21 +188,21 @@ public class ComboCounter implements IModule {
             for (i = 0; i < list.length; i++) {
                 ResourceLocation resource = list[i];
 
-                drawComboText(i, width, height, resource, drawScaleOverlay, scaleOverlayProgress, overlayProgress);
+                drawComboText(i, width, height, resource, drawScaleOverlay, scaleOverlayProgress, overlayProgress, alpha);
             }
 
-            drawComboText(i, width, height, numberXTexture, drawScaleOverlay, scaleOverlayProgress, overlayProgress);
+            drawComboText(i, width, height, numberXTexture, drawScaleOverlay, scaleOverlayProgress, overlayProgress, alpha);
 
             GlStateManager.disableAlpha();
             GlStateManager.disableBlend();
         }
     }
 
-    private void drawComboText(int index, int screenWidth, int screenHeight, ResourceLocation resource, boolean drawScaleOverlay, float scaleOverlayProgress, float overlayProgress) {
+    private void drawComboText(int index, int screenWidth, int screenHeight, ResourceLocation resource, boolean drawScaleOverlay, float scaleOverlayProgress, float overlayProgress, float alpha) {
         GlStateManager.pushAttrib();
         GlStateManager.pushMatrix();
 
-        GlStateManager.translate(LEFT_MARGIN + index * SPRITE_WIDTH, screenHeight - BOTTOM_MARGIN - SPRITE_HEIGHT, 0);
+        GlStateManager.translate(LEFT_MARGIN + index * SCREEN_SPRITE_WIDTH, screenHeight - BOTTOM_MARGIN, 0);
 
         GlStateManager.pushAttrib();
         GlStateManager.pushMatrix();
@@ -192,22 +210,22 @@ public class ComboCounter implements IModule {
         minecraft.getTextureManager().bindTexture(resource);
 
         if (drawScaleOverlay) {
-            GlStateManager.color(1, 1, 1, (1 - scaleOverlayProgress) * 0.75f);
+            GlStateManager.color(1, 1, 1, (1 - scaleOverlayProgress) * 0.75f * alpha);
 
             float scaleOverlayScale = 1 + POPOUT_SCALE - scaleOverlayProgress * POPOUT_SCALE;
             GlStateManager.scale(scaleOverlayScale, scaleOverlayScale, 1);
-            Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT);
+            Gui.drawModalRectWithCustomSizedTexture(0, -SCREEN_SPRITE_HEIGHT, 0, 0, SCREEN_SPRITE_WIDTH, SCREEN_SPRITE_HEIGHT, SCREEN_SPRITE_WIDTH, SCREEN_SPRITE_HEIGHT);
         }
 
         GlStateManager.popAttrib();
         GlStateManager.popMatrix();
 
-        GlStateManager.color(1, 1, 1);
+        GlStateManager.color(1, 1, alpha);
 
         float overlayScale = 1 + POPOUT_SMALL_SCALE - scaleOverlayProgress * POPOUT_SMALL_SCALE;
         GlStateManager.scale(overlayScale, overlayScale, 1);
 
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT);
+        Gui.drawModalRectWithCustomSizedTexture(0, -SCREEN_SPRITE_HEIGHT, 0, 0, SCREEN_SPRITE_WIDTH, SCREEN_SPRITE_HEIGHT, SCREEN_SPRITE_WIDTH, SCREEN_SPRITE_HEIGHT);
 
         GlStateManager.popAttrib();
         GlStateManager.popMatrix();
