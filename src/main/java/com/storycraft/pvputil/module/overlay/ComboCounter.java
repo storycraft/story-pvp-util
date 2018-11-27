@@ -28,7 +28,13 @@ public class ComboCounter implements IModule {
     private static final int LEFT_MARGIN = 10;
     private static final int BOTTOM_MARGIN = 10;
 
+    private static final float POPOUT_SCALE = 1.6f;
+    private static final float POPOUT_SMALL_SCALE = 1.1f;
+
+    private static final float POPOUT_DURATION = 150f;
+
     private PvpUtil mod;
+    private Minecraft minecraft;
 
     private List<ResourceLocation> numberTextureList;
     private ResourceLocation numberXTexture;
@@ -50,6 +56,7 @@ public class ComboCounter implements IModule {
     @Override
     public void initialize(PvpUtil mod) {
         this.mod = mod;
+        this.minecraft = Minecraft.getMinecraft();
         this.enabled = isModEnabled();
         this.soundEnabled = isSoundEnabled();
         this.currentCombo = 0;
@@ -144,29 +151,53 @@ public class ComboCounter implements IModule {
             GlStateManager.enableAlpha();
             GlStateManager.enableBlend();
 
+            long timeFromLastHit = (System.currentTimeMillis() - getLastComboChange());
+            boolean drawScaleOverlay = timeFromLastHit <= POPOUT_DURATION;
+            boolean overlayScale = timeFromLastHit >= 150 && (timeFromLastHit - 150) <= POPOUT_DURATION;
+            float scaleOverlayProgress = 0;
+            float overlayProgress = 1;
+
+            if (drawScaleOverlay)
+                scaleOverlayProgress = timeFromLastHit / POPOUT_DURATION;
+
+            if (overlayScale)
+                overlayProgress = (timeFromLastHit - 150) / POPOUT_DURATION;
+
             int i;
             for (i = 0; i < list.length; i++) {
-                ResourceLocation resource = list[0];
-                minecraft.getTextureManager().bindTexture(resource);
+                ResourceLocation resource = list[i];
 
-                minecraft.ingameGUI.drawTexturedModalRect(LEFT_MARGIN + i * 30, height - BOTTOM_MARGIN - 40, 0, 0, 30, 40);
+                drawComboText(i, width, height, resource, drawScaleOverlay, scaleOverlayProgress, overlayProgress);
             }
 
-            minecraft.getTextureManager().bindTexture(numberXTexture);
-            minecraft.ingameGUI.drawTexturedModalRect(LEFT_MARGIN + i * 30, height - BOTTOM_MARGIN - 40, 0, 0, 30, 40);
+            drawComboText(i, width, height, numberXTexture, drawScaleOverlay, scaleOverlayProgress, overlayProgress);
 
             GlStateManager.disableAlpha();
             GlStateManager.disableBlend();
         }
     }
 
-    protected ResourceLocation[] getRequiredTexture(int combo) {
-        ResourceLocation[] list = new ResourceLocation[((int) Math.log10(combo)) + 1];
+    private void drawComboText(int index, int screenWidth, int screenHeight, ResourceLocation resource, boolean drawScaleOverlay, float scaleOverlayProgress, float overlayProgress) {
+        minecraft.getTextureManager().bindTexture(resource);
 
-        for (int currentNumber = 0, i = 0; (currentNumber = (combo % 10)) > 0; combo /= 10, i++) {
-            list[i] = numberTextureList.get(currentNumber);
+        if (drawScaleOverlay) {
+            GlStateManager.color(1, 1, 1, (1 - scaleOverlayProgress) * 0.75f);
+            minecraft.ingameGUI.drawTexturedModalRect(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)), (int) (40 * ((1 - scaleOverlayProgress) * POPOUT_SCALE)));
         }
 
+        GlStateManager.color(1, 1, 1);
+
+        minecraft.ingameGUI.drawTexturedModalRect(LEFT_MARGIN + index * 30, screenHeight - BOTTOM_MARGIN - 40, 0, 0, (int) (30 * (overlayProgress * POPOUT_SMALL_SCALE)), (int) (40 * (overlayProgress * POPOUT_SMALL_SCALE)));
+    }
+
+    protected ResourceLocation[] getRequiredTexture(int combo) {
+        int size = ((int) Math.log10(combo)) + 1;
+        ResourceLocation[] list = new ResourceLocation[size];
+
+        for (int i = 0; i < size; i++) {
+            list[i] = numberTextureList.get(combo % 10);
+            combo /= 10;
+        }
         return list;
     }
 
