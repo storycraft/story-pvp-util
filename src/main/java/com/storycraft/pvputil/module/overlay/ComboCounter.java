@@ -17,10 +17,12 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 
 public class ComboCounter implements IModule {
 
@@ -124,7 +126,12 @@ public class ComboCounter implements IModule {
     }
 
     @SubscribeEvent
-    public void onDamage(LivingAttackEvent e) {
+    public void onLogin(ClientConnectedToServerEvent e) {
+        setCombo(0);
+    }
+
+    @SubscribeEvent
+    public void onDamage(LivingHurtEvent e) {
         if (e.entityLiving == null || !enabled) {
             return;
         }
@@ -143,6 +150,10 @@ public class ComboCounter implements IModule {
         if (e.entityPlayer == null || !e.entityPlayer.isUser() || !enabled){
             return;
         }
+
+        if ((System.currentTimeMillis() - getLastComboChange()) >= IDLE_START)
+            setCombo(0);
+
         
         setCombo(getCombo() + 1);
     }
@@ -220,7 +231,7 @@ public class ComboCounter implements IModule {
         GlStateManager.popAttrib();
         GlStateManager.popMatrix();
 
-        GlStateManager.color(1, 1, alpha);
+        GlStateManager.color(1, 1, 1, alpha);
 
         float overlayScale = 1 + POPOUT_SMALL_SCALE - scaleOverlayProgress * POPOUT_SMALL_SCALE;
         GlStateManager.scale(overlayScale, overlayScale, 1);
