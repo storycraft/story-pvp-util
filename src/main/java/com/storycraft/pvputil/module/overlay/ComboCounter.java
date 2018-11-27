@@ -160,7 +160,7 @@ public class ComboCounter implements IModule {
             setCombo(getCombo() + 1);
         else if (e.target instanceof EntityPlayer && ((EntityPlayer) e.target).isUser() && soundEnabled && getCombo() > 25) {
             setCombo(0);
-            e.entityLiving.getEntityWorld().playSound(e.entityLiving.posX, e.entityLiving.posY, e.entityLiving.posZ, soundComboBreak.toString(), 1f, 1f, false);
+            e.target.getEntityWorld().playSound(e.target.posX, e.target.posY, e.target.posZ, soundComboBreak.toString(), 1f, 1f, false);
         }
     }
 
