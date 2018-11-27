@@ -8,6 +8,7 @@ import com.storycraft.pvputil.config.json.JsonConfigEntry;
 import com.storycraft.pvputil.module.IModule;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -147,15 +148,19 @@ public class ComboCounter implements IModule {
     
     @SubscribeEvent
     public void onHit(AttackEntityEvent e) {
-        if (e.entityPlayer == null || !e.entityPlayer.isUser() || !enabled){
+        if (e.entityPlayer == null || !enabled || !(e.target instanceof EntityPlayer)) {
             return;
         }
 
-        if ((System.currentTimeMillis() - getLastComboChange()) >= IDLE_START)
+        if ((System.currentTimeMillis() - getLastComboChange()) >= IDLE_START) {
             setCombo(0);
+        }
 
-        
-        setCombo(getCombo() + 1);
+        if (e.entityPlayer.isUser())
+            setCombo(getCombo() + 1);
+        else if (e.target instanceof EntityPlayer && ((EntityPlayer) e.target).isUser() && soundEnabled) {
+            e.entityLiving.getEntityWorld().playSound(e.entityLiving.posX, e.entityLiving.posY, e.entityLiving.posZ, soundComboBreak.toString(), 1f, 1f, false);
+        }
     }
 
     @SubscribeEvent
