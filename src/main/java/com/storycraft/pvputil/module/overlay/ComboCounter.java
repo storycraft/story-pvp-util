@@ -142,11 +142,11 @@ public class ComboCounter implements IModule {
             if (lastHP != e.player.getHealth()) {
 
                 if (lastHP > e.player.getHealth()) {
-                    setCombo(0);
-
                     if (soundEnabled && getCombo() > 25) {
                         e.player.getEntityWorld().playSound(e.player.posX, e.player.posY, e.player.posZ, soundComboBreak.toString(), 1f, 1f, false);
                     }
+
+                    setCombo(0);
                 }
 
                 lastHP = e.player.getHealth();
@@ -170,7 +170,7 @@ public class ComboCounter implements IModule {
 
     @SubscribeEvent
     public void onScreenDraw(RenderGameOverlayEvent.Post e) {
-        if (e.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && enabled && currentCombo > 0) {
+        if (e.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && enabled && getCombo() > 0) {
             long timeFromLastHit = (System.currentTimeMillis() - getLastComboChange());
             boolean fade = timeFromLastHit >= IDLE_START;
             
@@ -184,7 +184,7 @@ public class ComboCounter implements IModule {
                 alpha = 1 - (timeFromLastHit - IDLE_START) / COMBO_FADE;
             }
 
-            ResourceLocation[] list = getRequiredTexture(currentCombo);
+            ResourceLocation[] list = getRequiredTexture(getCombo());
 
             ScaledResolution scaledresolution = new ScaledResolution(minecraft);
             int width = scaledresolution.getScaledWidth();
