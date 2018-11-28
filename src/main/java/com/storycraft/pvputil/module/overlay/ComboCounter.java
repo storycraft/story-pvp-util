@@ -61,7 +61,7 @@ public class ComboCounter implements IModule {
     private int lastCombo;
     private int currentCombo;
 
-    private float lastHP;
+    private float lastHurtTime;
 
     private ResourceLocation soundComboBreak;
 
@@ -77,7 +77,7 @@ public class ComboCounter implements IModule {
         this.enabled = isModEnabled();
         this.soundEnabled = isSoundEnabled();
         this.currentCombo = 0;
-        this.lastHP = 0;
+        this.lastHurtTime = 0;
 
         this.soundComboBreak = new ResourceLocation(PvpUtil.getModMetadata().modId, "combo.break");
 
@@ -139,9 +139,8 @@ public class ComboCounter implements IModule {
     @SubscribeEvent
     public void onPlayerHealthChange(PlayerTickEvent e) {
         if (e.player.isUser() && enabled && e.phase == Phase.END) {
-            if (lastHP != e.player.getHealth()) {
-
-                if (lastHP > e.player.getHealth()) {
+            if (lastHurtTime != e.player.hurtTime) {
+                if (lastHurtTime < e.player.hurtTime) {
                     if (soundEnabled && getCombo() > 25) {
                         e.player.getEntityWorld().playSound(e.player.posX, e.player.posY, e.player.posZ, soundComboBreak.toString(), 1f, 1f, false);
                     }
@@ -149,7 +148,7 @@ public class ComboCounter implements IModule {
                     setCombo(0);
                 }
 
-                lastHP = e.player.getHealth();
+                lastHurtTime = e.player.hurtTime;
             }
         }
     }
