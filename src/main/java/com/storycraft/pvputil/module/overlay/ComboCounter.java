@@ -138,11 +138,11 @@ public class ComboCounter implements IModule {
 
     @SubscribeEvent
     public void onPlayerHurt(PlayerTickEvent e) {
-        if (e.player.isUser() && enabled && e.phase == Phase.END) {
+        if (e.player.isUser() && enabled && e.phase == Phase.START) {
             if (lastHurtTime != e.player.hurtTime) {
                 if (lastHurtTime < e.player.hurtTime) {
                     if (soundEnabled && getCombo() > 25) {
-                        e.player.getEntityWorld().playSound(e.player.posX, e.player.posY, e.player.posZ, soundComboBreak.toString(), 1f, 1f, false);
+                        e.player.playSound(soundComboBreak.toString(), 1f, 1f);
                     }
 
                     setCombo(0);
