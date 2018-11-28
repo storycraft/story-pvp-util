@@ -137,7 +137,7 @@ public class ComboCounter implements IModule {
     }
 
     @SubscribeEvent
-    public void onPlayerHealthChange(PlayerTickEvent e) {
+    public void onPlayerHurt(PlayerTickEvent e) {
         if (e.player.isUser() && enabled && e.phase == Phase.END) {
             if (lastHurtTime != e.player.hurtTime) {
                 if (lastHurtTime < e.player.hurtTime) {
